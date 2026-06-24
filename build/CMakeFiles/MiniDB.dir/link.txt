@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/MiniDB.dir/src/main.cpp.o CMakeFiles/MiniDB.dir/src/database.cpp.o -o MiniDB 

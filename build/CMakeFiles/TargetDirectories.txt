@@ -1,0 +1,3 @@
+/home/yugam05/MiniDB/build/CMakeFiles/MiniDB.dir
+/home/yugam05/MiniDB/build/CMakeFiles/edit_cache.dir
+/home/yugam05/MiniDB/build/CMakeFiles/rebuild_cache.dir
