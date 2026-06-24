@@ -8,4 +8,5 @@ add_executable(
     MiniDB
     src/main.cpp
     src/database.cpp
+    src/table.cpp
 )

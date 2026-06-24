@@ -1,9 +1,17 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
-class Database {
+#include <string>
+#include <vector>
+
+class Database
+{
 public:
-    Database();
+    bool createTable(const std::string& tableName);
+    void selectAll(const std::string& tableName);
+
+private:
+    std::vector<std::string> tables;
 };
 
 #endif
