@@ -5,21 +5,48 @@
 #include <iomanip>
 #include <iostream>
 #include <filesystem>
+#include <algorithm>
 
 using namespace std;
+namespace fs = std::filesystem;
 
-bool Database::createTable(const string& tableName)
+Database::Database()
 {
-    string filename = "../data/" + tableName + ".tbl";
+    ifstream meta("../data/schema.meta");
+    string table;
 
-    if(filesystem::exists(filename))
+    while (getline(meta, table))
+    {
+        if (!table.empty())
+        {
+            tables.push_back(table);
+        }
+    }
+
+    meta.close();
+}
+
+bool Database::tableExists(const string &tableName)
+{
+    return find(tables.begin(), tables.end(), tableName) != tables.end();
+}
+
+bool Database::createTable(const string &tableName)
+{
+    if (tableExists(tableName))
     {
         cout << "Table already exists\n";
         return false;
     }
 
-    ofstream file(filename);
-    file.close();
+    string filename = "../data/" + tableName + ".tbl";
+    ofstream tableFile(filename);
+    tableFile.close();
+
+    ofstream meta("../data/schema.meta", ios::app);
+    meta << tableName << '\n';
+    meta.close();
+
     tables.push_back(tableName);
 
     return true;
@@ -27,9 +54,19 @@ bool Database::createTable(const string& tableName)
 
 void Database::selectAll(const std::string &tableName)
 {
+    if (!tableExists(tableName))
+    {
+        cout << "Error: Table '" << tableName << "' does not exist\n";
+        return;
+    }
     Table table(tableName);
 
     auto rows = table.selectAll();
+    if (rows.empty())
+    {
+        cout << "No rows found.\n";
+        return;
+    }
 
     cout << "+----+--------------------------------+\n";
 

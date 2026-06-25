@@ -7,8 +7,11 @@
 class Database
 {
 public:
+    Database();
+
     bool createTable(const std::string& tableName);
     void selectAll(const std::string& tableName);
+    bool tableExists(const std::string& tableName);
 
 private:
     std::vector<std::string> tables;

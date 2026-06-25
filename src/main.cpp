@@ -18,75 +18,157 @@ int main()
     while (true)
     {
         cout << "MiniDB > ";
-
         getline(cin, query);
 
-        if (query.rfind("CREATE TABLE ", 0) == 0)
+        // EXIT
+        if (query == "EXIT")
+        {
+            break;
+        }
+
+        // CREATE TABLE
+        else if (query.rfind("CREATE TABLE ", 0) == 0)
         {
             string tableName = query.substr(13);
 
-            if (tableName.back() == ';')
+            if (!tableName.empty() && tableName.back() == ';')
                 tableName.pop_back();
 
-            if(db.createTable(tableName))   cout << "Table created\n";
+            if (tableName.empty())
+            {
+                cout << "Error: Missing table name\n";
+                continue;
+            }
+
+            if (db.createTable(tableName))
+                cout << "Table created\n";
         }
 
-        if (query.rfind("INSERT INTO ", 0) == 0)
+        // INSERT
+        else if (query.rfind("INSERT INTO ", 0) == 0)
         {
             size_t valuesPos = query.find(" VALUES");
 
+            if (valuesPos == string::npos)
+            {
+                cout << "Error: Invalid INSERT syntax\n";
+                continue;
+            }
+
             string tableName = query.substr(12, valuesPos - 12);
 
-            size_t start = query.find("(");
+            if (!db.tableExists(tableName))
+            {
+                cout << "Error: Table '" << tableName << "' not found\n";
+                continue;
+            }
 
-            size_t end = query.find(")");
+            size_t start = query.find('(');
+            size_t end = query.rfind(')');
+
+            if (start == string::npos ||
+                end == string::npos ||
+                end <= start)
+            {
+                cout << "Error: Invalid VALUES clause\n";
+                continue;
+            }
 
             string values = query.substr(start + 1, end - start - 1);
 
             stringstream ss(values);
 
             string idStr;
-            getline(ss, idStr, ',');
-
-            int id = stoi(idStr);
-
             string name;
-            getline(ss, name);
 
-            if (name[0] == ' ')
+            if (!getline(ss, idStr, ','))
+            {
+                cout << "Error: Missing ID\n";
+                continue;
+            }
+
+            if (!getline(ss, name))
+            {
+                cout << "Error: Missing name\n";
+                continue;
+            }
+
+            int id;
+
+            try
+            {
+                id = stoi(idStr);
+            }
+            catch (...)
+            {
+                cout << "Error: Invalid ID\n";
+                continue;
+            }
+
+            if (!name.empty() && name.front() == ' ')
                 name.erase(0, 1);
 
-            if (name.front() == '\'')
+            if (!name.empty() && name.front() == '\'')
                 name.erase(0, 1);
 
-            if (name.back() == '\'')
+            if (!name.empty() && name.back() == '\'')
                 name.pop_back();
 
             Row row;
+
+            if (name.length() >= sizeof(row.name))
+            {
+                cout << "Error: Name too long\n";
+                continue;
+            }
+
             row.id = id;
-            strncpy(row.name, name.c_str(), sizeof(row.name) - 1);
+
+            strncpy(
+                row.name,
+                name.c_str(),
+                sizeof(row.name) - 1);
 
             row.name[sizeof(row.name) - 1] = '\0';
 
             Table table(tableName);
+
             table.insert(row);
 
-            cout << "1 row inserted" << endl;
+            cout << "1 row inserted\n";
         }
 
-        if (query.rfind("SELECT * FROM ", 0) == 0)
+        // SELECT
+        else if (query.rfind("SELECT * FROM ", 0) == 0)
         {
             string tableName = query.substr(14);
 
-            if (tableName.back() == ';')
+            if (!tableName.empty() &&
+                tableName.back() == ';')
             {
                 tableName.pop_back();
             }
+
+            if (tableName.empty())
+            {
+                cout << "Error: Missing table name\n";
+                continue;
+            }
+
+            if (!db.tableExists(tableName))
+            {
+                cout << "Error: Table '" << tableName << "' not found\n";
+                continue;
+            }
+
             db.selectAll(tableName);
         }
 
-        if (query == "EXIT")
-            break;
+        // Unknown command
+        else
+        {
+            cout << "Error: Invalid SQL statement\n";
+        }
     }
 
     return 0;
