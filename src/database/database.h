@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include "../models/row.h"
 
 class Database
 {
@@ -10,7 +11,7 @@ public:
     Database();
 
     bool createTable(const std::string& tableName);
-    void selectAll(const std::string& tableName);
+    std::vector<Row> selectAll(const std::string& tableName);
     bool tableExists(const std::string& tableName);
 
 private:

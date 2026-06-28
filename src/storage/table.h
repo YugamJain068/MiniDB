@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "row.h"
+#include "storage_manager.h"
 
 class Table
 {
@@ -17,6 +17,7 @@ public:
 
 private:
     std::string filename;
+    StorageManager storageManager;
 };
 
 #endif
