@@ -7,6 +7,7 @@
 #include "parser/lexer.h"
 #include "parser/ast.h"
 #include "executor/executor.h"
+#include "storage/page.h"
 
 using namespace std;
 

@@ -4,56 +4,109 @@
 
 using namespace std;
 
-void StorageManager::writeRow(
-    const string& filename,
-    const Row& row)
+Page StorageManager::readPage(
+    const string &filename,
+    int pageNumber)
 {
-    ofstream file(
+    Page page;
+
+    ifstream file(
         filename,
-        ios::binary | ios::app
-    );
+        ios::binary);
+
+    if (!file)
+    {
+        return page;
+    }
+
+    file.seekg(pageNumber * PAGE_SIZE);
+
+    file.read(
+        page.data,
+        PAGE_SIZE);
+
+    file.close();
+
+    return page;
+}
+
+void StorageManager::writePage(
+    const string &filename,
+    int pageNumber,
+    const Page &page)
+{
+    fstream file(
+        filename,
+        ios::binary | ios::in | ios::out);
 
     if (!file)
     {
         return;
     }
 
+    file.seekp(pageNumber * PAGE_SIZE);
+
     file.write(
-        reinterpret_cast<const char*>(&row),
-        sizeof(Row)
-    );
+        page.data,
+        PAGE_SIZE);
 
     file.close();
 }
 
-vector<Row> StorageManager::readRows(
-    const string& filename)
+int StorageManager::allocatePage(
+    const string &filename)
 {
-    vector<Row> rows;
-
-    ifstream file(
+    fstream file(
         filename,
-        ios::binary
-    );
+        ios::binary | ios::in | ios::out);
 
+    // Create file if it doesn't exist
     if (!file)
     {
-        return rows;
+        ofstream create(filename, ios::binary);
+        create.close();
+
+        file.open(
+            filename,
+            ios::binary | ios::in | ios::out);
     }
 
-    Row row;
+    file.seekg(0, ios::end);
 
-    while (
-        file.read(
-            reinterpret_cast<char*>(&row),
-            sizeof(Row)
-        )
-    )
-    {
-        rows.push_back(row);
-    }
+    streampos fileSize = file.tellg();
+
+    int pageNumber = static_cast<int>(
+        fileSize / PAGE_SIZE);
+
+    Page emptyPage;
+
+    file.write(
+        emptyPage.data,
+        PAGE_SIZE);
 
     file.close();
 
-    return rows;
+    return pageNumber;
+}
+
+int StorageManager::getPageCount(
+    const std::string& filename)
+{
+    ifstream file(
+        filename,
+        ios::binary);
+
+    if (!file)
+    {
+        return 0;
+    }
+
+    file.seekg(0, ios::end);
+
+    streampos fileSize = file.tellg();
+
+    file.close();
+
+    return static_cast<int>(
+        fileSize / PAGE_SIZE);
 }

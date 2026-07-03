@@ -5,17 +5,27 @@
 #include <string>
 
 #include "../models/row.h"
+#include "page.h"
 
 class StorageManager
 {
 public:
 
-    void writeRow(
+    Page readPage(
         const std::string& filename,
-        const Row& row);
+        int pageNumber
+    );
 
-    std::vector<Row> readRows(
-        const std::string& filename);
+    void writePage(
+        const std::string& filename,
+        int pageNumber,
+        const Page& page
+    );
+
+    int allocatePage(
+        const std::string& filename
+    );
+    int getPageCount(const std::string& filename);
 };
 
 #endif

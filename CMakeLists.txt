@@ -10,6 +10,7 @@ add_executable(
     src/database/database.cpp
     src/storage/table.cpp
     src/storage/storage_manager.cpp
+    src/storage/page.cpp
     src/parser/sql_parser.cpp
     src/parser/token.cpp
     src/parser/lexer.cpp
