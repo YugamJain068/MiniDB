@@ -15,4 +15,6 @@ add_executable(
     src/parser/token.cpp
     src/parser/lexer.cpp
     src/executor/executor.cpp
+    src/buffer/buffer_pool_manager.cpp
+    src/buffer/lru_replacer.cpp
 )
