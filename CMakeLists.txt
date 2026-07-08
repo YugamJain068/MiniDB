@@ -17,4 +17,5 @@ add_executable(
     src/executor/executor.cpp
     src/buffer/buffer_pool_manager.cpp
     src/buffer/lru_replacer.cpp
+    src/bptree/b_plus_tree.cpp
 )
