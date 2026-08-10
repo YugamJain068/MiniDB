@@ -4,18 +4,25 @@
 #include <list>
 #include <unordered_map>
 
+#include "../storage/page_key.h"
+
 class LRUReplacer
 {
 private:
-    std::list<int> lruList;
+    std::list<PageKey> lruList;
 
-    std::unordered_map<int,std::list<int>::iterator> pageMap;
+    std::unordered_map<
+        PageKey,
+        std::list<PageKey>::iterator,
+        PageKeyHash>
+        pageMap;
 
 public:
+    void AccessPage(const PageKey &key);
 
-    void AccessPage(int pageId);
-    bool Victim(int& pageId);
-    void Remove(int pageId);
+    bool Victim(PageKey &key);
+
+    void Remove(const PageKey &key);
     void Print() const;
 };
 

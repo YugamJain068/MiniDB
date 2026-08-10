@@ -96,11 +96,66 @@ void Executor::executeInsert(InsertStatement *stmt)
 
     row.name[sizeof(row.name) - 1] = '\0';
 
-    Table table(stmt->tableName);
+    Table &table = database.getTable(stmt->tableName);
 
-    table.insert(row);
+    RecordPointer ptr =
+        table.insert(row);
 
-    cout << "1 row inserted\n";
+    std::cout
+        << "Stored at Page "
+        << ptr.pageId
+        << ", Slot "
+        << ptr.slotId
+        << '\n';
+    try
+    {
+        database.getIndex().insert(
+            row.id,
+            ptr);
+    }
+    catch (const std::exception &e)
+    {
+        std::cout
+            << e.what()
+            << '\n';
+
+        return;
+    }
+    std::cout
+        << "Indexed Key "
+        << row.id
+        << '\n';
+    RecordPointer found =
+        database.getIndex().search(row.id);
+
+    if (found.pageId != ptr.pageId ||
+        found.slotId != ptr.slotId)
+    {
+        std::cout
+            << "INDEX ERROR!\n";
+
+        std::cout
+            << "Expected "
+            << ptr.pageId
+            << " "
+            << ptr.slotId
+            << '\n';
+
+        std::cout
+            << "Found "
+            << found.pageId
+            << " "
+            << found.slotId
+            << '\n';
+    }
+
+    std::cout
+        << found.pageId
+        << " "
+        << found.slotId
+        << '\n';
+    std::cout
+        << "1 row inserted\n";
 }
 
 void Executor::executeSelect(SelectStatement *stmt)
@@ -110,6 +165,35 @@ void Executor::executeSelect(SelectStatement *stmt)
         cout << "Table not found\n";
         return;
     }
+    if (stmt->hasWhere)
+    {
+        RecordPointer ptr =
+            database
+                .getIndex()
+                .search(stmt->whereId);
+
+        if (ptr.pageId == -1)
+        {
+            std::cout
+                << "No rows found.\n";
+
+            return;
+        }
+
+        Row row =
+            database.selectByPointer(
+                stmt->tableName,
+                ptr);
+
+        std::cout
+            << row.id
+            << " "
+            << row.name
+            << '\n';
+
+        return;
+    }
+    std::cout << "Full Table Scan\n";
 
     auto rows = database.selectAll(stmt->tableName);
 

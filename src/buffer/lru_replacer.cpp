@@ -2,35 +2,35 @@
 
 #include <iostream>
 
-void LRUReplacer::AccessPage(int pageId)
+void LRUReplacer::AccessPage(const PageKey &key)
 {
-    auto it = pageMap.find(pageId);
+    auto it = pageMap.find(key);
 
     if (it != pageMap.end())
     {
         lruList.erase(it->second);
     }
 
-    lruList.push_front(pageId);
+    lruList.push_front(key);
 
-    pageMap[pageId] = lruList.begin();
+    pageMap[key] = lruList.begin();
 }
 
-bool LRUReplacer::Victim(int& pageId)
+bool LRUReplacer::Victim(PageKey &key)
 {
     if (lruList.empty())
     {
         return false;
     }
 
-    pageId = lruList.back();
+    key = lruList.back();
 
     return true;
 }
 
-void LRUReplacer::Remove(int pageId)
+void LRUReplacer::Remove(const PageKey &key)
 {
-    auto it = pageMap.find(pageId);
+    auto it = pageMap.find(key);
 
     if (it == pageMap.end())
     {
@@ -46,9 +46,14 @@ void LRUReplacer::Print() const
 {
     std::cout << "\nLRU Order\n";
 
-    for (int page : lruList)
+    for (const PageKey &page : lruList)
     {
-        std::cout << page << " ";
+        std::cout
+            << "("
+            << page.filename
+            << ", "
+            << page.pageId
+            << ") ";
     }
 
     std::cout << '\n';
