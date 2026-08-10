@@ -17,9 +17,11 @@ void BufferPoolManager::printFrames() const
 
         std::cout
             << "Frame " << i
+            << " | File " << frame.filename
             << " | Page " << frame.pageId
             << " | Pin " << frame.pinCount
             << " | Dirty " << frame.dirty
+            << " | Used " << frame.isUsed
             << '\n';
     }
 }
@@ -30,7 +32,10 @@ Page *BufferPoolManager::FetchPage(const std::string &filename,
     // ----------------------------
     // Step 1 : Check Page Table
     // ----------------------------
-    auto it = pageTable.find(pageId);
+    PageKey key{
+        filename,
+        pageId};
+    auto it = pageTable.find(key);
 
     if (it != pageTable.end())
     {
@@ -38,7 +43,16 @@ Page *BufferPoolManager::FetchPage(const std::string &filename,
 
         frame.pinCount++;
 
-        replacer.AccessPage(pageId);
+        std::cout
+            << "Pin Count = "
+            << frame.pinCount
+            << '\n';
+
+        PageKey key{
+            filename,
+            pageId};
+
+        replacer.AccessPage(key);
 
         std::cout << "Page found in Buffer Pool\n";
 
@@ -49,7 +63,7 @@ Page *BufferPoolManager::FetchPage(const std::string &filename,
 
     if (frameIndex == -1)
     {
-        if (!EvictPage(filename, frameIndex))
+        if (!EvictPage(frameIndex))
             return nullptr;
     }
 
@@ -61,6 +75,19 @@ Page *BufferPoolManager::FetchPage(const std::string &filename,
     return &frames[frameIndex].page;
 }
 
+void BufferPoolManager::FlushFrame(Frame &frame)
+{
+    if (!frame.dirty)
+        return;
+
+    storageManager.writePage(
+        frame.filename,
+        frame.pageId,
+        frame.page);
+
+    frame.dirty = false;
+}
+
 void BufferPoolManager::printPageTable() const
 {
     std::cout << "\nPage Table\n";
@@ -68,17 +95,25 @@ void BufferPoolManager::printPageTable() const
     for (const auto &entry : pageTable)
     {
         std::cout
-            << "Page "
-            << entry.first
+            << entry.first.filename
+            << " Page "
+            << entry.first.pageId
             << " -> Frame "
             << entry.second
             << '\n';
     }
 }
 
-void BufferPoolManager::UnpinPage(int pageId)
+void BufferPoolManager::UnpinPage(
+    const std::string &filename,
+    int pageId)
 {
-    auto it = pageTable.find(pageId);
+    PageKey key{
+        filename,
+        pageId};
+
+    auto it =
+        pageTable.find(key);
 
     if (it == pageTable.end())
     {
@@ -88,10 +123,14 @@ void BufferPoolManager::UnpinPage(int pageId)
 
     Frame &frame = frames[it->second];
 
-    if (frame.pinCount > 0)
+    if (frame.pinCount == 0)
     {
-        frame.pinCount--;
+        std::cout
+            << "Warning: Page already unpinned\n";
+        return;
     }
+
+    frame.pinCount--;
 
     std::cout << "Page "
               << pageId
@@ -100,9 +139,12 @@ void BufferPoolManager::UnpinPage(int pageId)
               << '\n';
 }
 
-bool BufferPoolManager::IsPagePinned(int pageId)
+bool BufferPoolManager::IsPagePinned(const std::string &filename, int pageId)
 {
-    auto it = pageTable.find(pageId);
+    PageKey key{
+        filename,
+        pageId};
+    auto it = pageTable.find(key);
 
     if (it == pageTable.end())
         return false;
@@ -110,22 +152,34 @@ bool BufferPoolManager::IsPagePinned(int pageId)
     return frames[it->second].pinCount > 0;
 }
 
-void BufferPoolManager::MarkDirty(int pageId)
+void BufferPoolManager::MarkDirty(const std::string &filename, int pageId)
 {
-    auto it = pageTable.find(pageId);
+    PageKey key{
+        filename,
+        pageId};
+
+    auto it = pageTable.find(key);
     if (it == pageTable.end())
     {
         std::cout << "Page not found\n";
         return;
     }
+    Frame &frame = frames[it->second];
+    if (frame.dirty)
+        return;
+    frame.dirty = true;
 
-    frames[it->second].dirty = true;
     std::cout << "Page " << pageId << " marked dirty\n";
 }
 
 void BufferPoolManager::FlushPage(const std::string &filename, int pageId)
 {
-    auto it = pageTable.find(pageId);
+    PageKey key{
+        filename,
+        pageId};
+
+    auto it =
+        pageTable.find(key);
     if (it == pageTable.end())
     {
         std::cout << "Page not found\n";
@@ -133,32 +187,26 @@ void BufferPoolManager::FlushPage(const std::string &filename, int pageId)
     }
 
     Frame &frame = frames[it->second];
-    if (!frame.dirty)
-    {
-        std::cout << "Page " << pageId << " is clean\n";
-        return;
-    }
-
-    storageManager.writePage(filename, pageId, frame.page);
-    frame.dirty = false;
+    FlushFrame(frame);
 
     std::cout << "Page " << pageId << " flushed to disk\n";
 }
 
-void BufferPoolManager::FlushAllPages(const std::string &filename)
+void BufferPoolManager::FlushAllPages()
 {
     for (Frame &frame : frames)
     {
         if (!frame.isUsed)
             continue;
 
-        if (!frame.dirty)
-            continue;
+        FlushFrame(frame);
 
-        storageManager.writePage(filename, frame.pageId, frame.page);
-        frame.dirty = false;
-
-        std::cout << "Flushed Page " << frame.pageId << '\n';
+        std::cout
+            << "Flushed "
+            << frame.filename
+            << " Page "
+            << frame.pageId
+            << '\n';
     }
 }
 
@@ -175,16 +223,14 @@ int BufferPoolManager::FindFreeFrame()
     return -1;
 }
 
-bool BufferPoolManager::EvictPage(const std::string &filename, int &frameIndex)
+bool BufferPoolManager::EvictPage(int &frameIndex)
 {
-    int victimPage;
+    PageKey victim;
 
-    if (!replacer.Victim(victimPage))
+    if (!replacer.Victim(victim))
         return false;
-    
-    
 
-    frameIndex = pageTable[victimPage];
+    frameIndex = pageTable[victim];
 
     Frame &frame = frames[frameIndex];
 
@@ -194,15 +240,20 @@ bool BufferPoolManager::EvictPage(const std::string &filename, int &frameIndex)
     if (frame.dirty)
     {
         storageManager.writePage(
-            filename,
-            victimPage,
+            frame.filename,
+            frame.pageId,
             frame.page);
     }
-    std::cout<<"Evicting Page "<<victimPage<<std::endl;
+    std::cout
+        << "Evicting "
+        << frame.filename
+        << " Page "
+        << frame.pageId
+        << '\n';
 
-    pageTable.erase(victimPage);
+    pageTable.erase(victim);
 
-    replacer.Remove(victimPage);
+    replacer.Remove(victim);
 
     return true;
 }
@@ -213,17 +264,41 @@ void BufferPoolManager::LoadPageIntoFrame(const std::string &filename, int pageI
 
     frame.page = storageManager.readPage(filename, pageId);
 
+    frame.filename = filename;
     frame.pageId = pageId;
     frame.pinCount = 1;
     frame.dirty = false;
     frame.isUsed = true;
 
-    pageTable[pageId] = frameIndex;
+    PageKey key{
+        filename,
+        pageId};
 
-    replacer.AccessPage(pageId);
+    pageTable[key] = frameIndex;
+    replacer.AccessPage(key);
 }
 
 void BufferPoolManager::printLRU() const
 {
     replacer.Print();
+}
+
+int BufferPoolManager::GetPageCount(
+    const std::string &filename)
+{
+    return storageManager.getPageCount(filename);
+}
+
+int BufferPoolManager::AllocatePage(
+    const std::string &filename)
+{
+    return storageManager.allocatePage(filename);
+}
+
+BufferPoolManager::~BufferPoolManager()
+{
+    FlushAllPages();
+
+    std::cout
+        << "Buffer Pool Shutdown Complete\n";
 }

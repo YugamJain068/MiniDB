@@ -20,6 +20,8 @@ struct Frame
     // Is this frame currently occupied?
     bool isUsed;
 
+    std::string filename;
+
     Frame()
     {
         pageId = -1;

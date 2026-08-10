@@ -7,20 +7,22 @@
 
 using namespace std;
 
-Database::Database()
+Database::Database() : bufferPool(2), index(&bufferPool)
 {
     ifstream meta("../data/schema.meta");
     if (!meta)
     {
         return;
     }
-    string table;
+    string tableName;
 
-    while (getline(meta, table))
+    while (getline(meta, tableName))
     {
-        if (!table.empty() && !tableExists(table))
+        if (!tableName.empty())
         {
-            tables.push_back(table);
+            tables.emplace(
+                tableName,
+                Table(tableName, bufferPool));
         }
     }
 
@@ -29,7 +31,7 @@ Database::Database()
 
 bool Database::tableExists(const string &tableName)
 {
-    return find(tables.begin(), tables.end(), tableName) != tables.end();
+    return tables.find(tableName) != tables.end();
 }
 
 bool Database::createTable(const string &tableName)
@@ -42,13 +44,38 @@ bool Database::createTable(const string &tableName)
     meta << tableName << '\n';
     meta.close();
 
-    tables.push_back(tableName);
+    tables.emplace(
+        tableName,
+        Table(tableName, bufferPool));
 
     return true;
 }
 
 vector<Row> Database::selectAll(const std::string &tableName)
 {
-    Table table(tableName);
-    return table.selectAll();
+    return tables.at(tableName).selectAll();
+}
+Row Database::selectByPointer(const std::string &tableName, const RecordPointer &ptr)
+{
+    return tables.at(tableName)
+        .readRow(
+            ptr.pageId,
+            ptr.slotId);
+}
+
+BufferPoolManager &
+Database::getBufferPool()
+{
+    return bufferPool;
+}
+
+BPlusTree &
+Database::getIndex()
+{
+    return index;
+}
+
+Table &Database::getTable(const std::string &tableName)
+{
+    return tables.at(tableName);
 }
