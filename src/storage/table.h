@@ -5,19 +5,22 @@
 #include <vector>
 
 #include "storage_manager.h"
+#include "../storage/record_pointer.h"
+#include "../buffer/buffer_pool_manager.h"
 
 class Table
 {
 public:
-    Table(const std::string& tableName);
+    Table(const std::string& tableName, BufferPoolManager& bufferPool);
 
-    void insert(const Row& row);
+    RecordPointer insert(const Row& row);
 
     std::vector<Row> selectAll();
+    Row readRow(int pageId, int slotId);
 
 private:
     std::string filename;
-    StorageManager storageManager;
+    BufferPoolManager& bufferPool;
 };
 
 #endif

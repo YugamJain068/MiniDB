@@ -27,7 +27,7 @@ public:
 
     bool insertRow(const Row& row);
 
-    bool getRow(int index, Row& row) const;
+    Row getRow(int slotId) const;
 };
 
 #endif

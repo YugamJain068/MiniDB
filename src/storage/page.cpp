@@ -1,6 +1,8 @@
 #include "page.h"
 #include <cstring>
 
+#include <stdexcept>
+
 #include "../models/row.h"
 
 Page::Page()
@@ -62,24 +64,23 @@ bool Page::insertRow(const Row& row)
     return true;
 }
 
-bool Page::getRow(
-    int index,
-    Row& row) const
+Row Page::getRow(int slotId) const
 {
-    if (index < 0 ||
-        index >= getRowCount())
+    if (slotId < 0 || slotId >= getRowCount())
     {
-        return false;
+        throw std::out_of_range("Invalid slot id");
     }
+
+    Row row;
 
     std::size_t offset =
         sizeof(uint16_t) +
-        index * sizeof(Row);
+        slotId * sizeof(Row);
 
     std::memcpy(
         &row,
         data + offset,
         sizeof(Row));
 
-    return true;
+    return row;
 }

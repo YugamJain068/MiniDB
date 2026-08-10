@@ -16,8 +16,6 @@ public:
         int pageNumber
     );
 
-    void readPage(const std::string& filename, int pageId, Page& page);
-
     void writePage(
         const std::string& filename,
         int pageNumber,
