@@ -52,6 +52,10 @@ std::vector<Token> Lexer::tokenize()
         {
             tokens.emplace_back(TokenType::SEMICOLON, ";");
         }
+        else if (c == '=')
+        {
+            tokens.emplace_back(TokenType::EQUAL, "=");
+        }
         else if (std::isalpha(c) || c == '_')
         {
             std::string word;
@@ -77,6 +81,8 @@ std::vector<Token> Lexer::tokenize()
                 tokens.emplace_back(TokenType::VALUES, word);
             else if (word == "INTO")
                 tokens.emplace_back(TokenType::INTO, word);
+            else if (word == "WHERE")
+                tokens.emplace_back(TokenType::WHERE, word);
             else
                 tokens.emplace_back(TokenType::IDENTIFIER, word);
         }

@@ -16,6 +16,9 @@ class SelectStatement : public Statement
 {
 public:
     std::string tableName;
+    bool hasWhere = false;
+
+    int whereId = -1;
 
     SelectStatement(const std::string &table) : tableName(table) {}
 };

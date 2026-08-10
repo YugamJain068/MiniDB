@@ -11,6 +11,7 @@ std::string tokenTypeToString(TokenType type)
         case TokenType::INTO: return "INTO";
         case TokenType::VALUES: return "VALUES";
         case TokenType::FROM: return "FROM";
+        case TokenType::WHERE: return "WHERE";
 
         case TokenType::IDENTIFIER: return "IDENTIFIER";
         case TokenType::NUMBER: return "NUMBER";
@@ -21,6 +22,7 @@ std::string tokenTypeToString(TokenType type)
         case TokenType::LEFT_PAREN: return "LEFT_PAREN";
         case TokenType::RIGHT_PAREN: return "RIGHT_PAREN";
         case TokenType::SEMICOLON: return "SEMICOLON";
+        case TokenType::EQUAL: return "EQUAL";
 
         case TokenType::END_OF_FILE: return "EOF";
         default: return "UNKNOWN";

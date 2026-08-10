@@ -9,17 +9,17 @@
 
 using namespace std;
 
-SQLParser::SQLParser(const std::vector<Token>& tokens)
+SQLParser::SQLParser(const std::vector<Token> &tokens)
     : tokens(tokens), current(0)
 {
 }
 
-const Token& SQLParser::peek() const
+const Token &SQLParser::peek() const
 {
     return tokens[current];
 }
 
-const Token& SQLParser::advance()
+const Token &SQLParser::advance()
 {
     if (!isAtEnd())
         current++;
@@ -44,7 +44,7 @@ bool SQLParser::match(TokenType type)
 }
 
 Token SQLParser::consume(TokenType type,
-                         const std::string& message)
+                         const std::string &message)
 {
     if (peek().type == type)
         return advance();
@@ -78,14 +78,34 @@ std::unique_ptr<SelectStatement> SQLParser::parseSelect()
         consume(TokenType::IDENTIFIER,
                 "Expected table name");
 
+    auto stmt =
+        std::make_unique<SelectStatement>(
+            table.value);
+
+    if (match(TokenType::WHERE))
+    {
+        Token column = consume(TokenType::IDENTIFIER, "Expected column name"); // id
+
+        if (column.value != "id")
+        {
+            throw std::runtime_error(
+                "Only WHERE id is supported.");
+        }
+        
+        consume(TokenType::EQUAL, "Expected =");
+
+        stmt->whereId =
+            std::stoi(
+                consume(TokenType::NUMBER, "Expected numeric id").value);
+
+        stmt->hasWhere = true;
+    }
+
     consume(TokenType::SEMICOLON,
             "Expected ;");
 
-    return std::make_unique<SelectStatement>(
-        table.value
-    );
+    return stmt;
 }
-
 
 std::unique_ptr<CreateTableStatement>
 SQLParser::parseCreate()
@@ -101,8 +121,7 @@ SQLParser::parseCreate()
             "Expected ;");
 
     return std::make_unique<CreateTableStatement>(
-        table.value
-    );
+        table.value);
 }
 
 std::unique_ptr<InsertStatement>
@@ -124,15 +143,13 @@ SQLParser::parseInsert()
     std::vector<std::string> values;
 
     values.push_back(
-        advance().value
-    );
+        advance().value);
 
     consume(TokenType::COMMA,
             "Expected ,");
 
     values.push_back(
-        advance().value
-    );
+        advance().value);
 
     consume(TokenType::RIGHT_PAREN,
             "Expected )");
@@ -142,6 +159,5 @@ SQLParser::parseInsert()
 
     return std::make_unique<InsertStatement>(
         table.value,
-        values
-    );
+        values);
 }

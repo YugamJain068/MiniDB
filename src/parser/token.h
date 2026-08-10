@@ -15,6 +15,7 @@ enum class TokenType
     INTO,
     VALUES,
     FROM,
+    WHERE,
 
     // User-defined names
     IDENTIFIER,
@@ -29,6 +30,7 @@ enum class TokenType
     LEFT_PAREN,
     RIGHT_PAREN,
     SEMICOLON,
+    EQUAL,
 
     // End of input
     END_OF_FILE,
