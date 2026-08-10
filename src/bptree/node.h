@@ -2,6 +2,7 @@
 #define NODE_H
 
 #include <vector>
+#include "../storage/record_pointer.h"
 
 class Node
 {
@@ -20,7 +21,7 @@ public:
 class LeafNode : public Node
 {
 public:
-    std::vector<int> values;
+    std::vector<RecordPointer> values;
 
     LeafNode *next;
 

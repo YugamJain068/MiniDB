@@ -94,7 +94,7 @@ Features
 * Fixed-size buffer pool
 * FetchPage()
 * UnpinPage()
-* FlushPage()
+* FlushPage
 * Dirty page tracking
 * LRU page replacement
 * Automatic eviction when memory is full
