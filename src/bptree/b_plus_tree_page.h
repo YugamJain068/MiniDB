@@ -2,8 +2,7 @@
 #define B_PLUS_TREE_PAGE_H
 
 #include <cstdint>
-
-constexpr int PAGE_SIZE = 4096;
+#include "../storage/page.h"
 
 enum class BPlusPageType : uint8_t
 {
@@ -17,12 +16,17 @@ struct BPlusTreePageHeader
     BPlusPageType type;
 
     uint8_t reserved[3];
-    
+
     uint16_t size;
 
     int32_t parentPageId;
 
     int32_t pageId;
 };
+
+void initializeBPlusPage(
+    BPlusTreePageHeader& header,
+    BPlusPageType type,
+    int32_t pageId);
 
 #endif

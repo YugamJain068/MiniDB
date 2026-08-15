@@ -1,52 +1,84 @@
 #ifndef B_PLUS_TREE_H
 #define B_PLUS_TREE_H
 
-#include "node.h"
+#include <string>
+#include <vector>
 
 #include "../buffer/buffer_pool_manager.h"
-constexpr int ORDER = 4;
+#include "../storage/record_pointer.h"
+
+#include "b_plus_tree_page_manager.h"
+#include "b_plus_tree_leaf_page.h"
+#include "b_plus_tree_internal_page.h"
 
 class BPlusTree
 {
 private:
-    Node *root;
-    BufferPoolManager *bufferPool;
-    bool verifyNode(
-        Node *node,
-        long long minKey,
-        bool minInclusive,
-        long long maxKey,
-        bool maxInclusive,
-        int depth,
-        int &leafDepth) const;
+    BufferPoolManager* bufferPool;
 
-    bool verifyLeafChain() const;
+    BPlusTreePageManager pageManager;
 
-    bool verifyAllKeys() const;
+    int rootPageId;
+
+    bool splitLeafPage(
+    int leafPageId,
+    const LeafEntry* entries,
+    int entryCount,
+    int& newLeafPageId,
+    int& separatorKey);
 
 public:
-    BPlusTree(BufferPoolManager *bpm);
+
+    BPlusTree(
+        BufferPoolManager* bpm,
+        const std::string& filename);
+
+    // ================================
+    // Tree lifecycle
+    // ================================
+
+    bool initialize();
 
     bool empty() const;
-    void printTree() const;
 
-    void insert(int key, const RecordPointer &pointer);
-    RecordPointer search(int key);
+    int getRootPageId() const;
 
-    LeafNode *findLeaf(int key);
-    void splitLeaf(LeafNode *leaf);
-    void printLeaves() const;
-    void insertIntoParent(Node *left, int key, Node *right);
-    void splitInternalNode(InternalNode *node);
-    bool verifyTree() const;
-    int height() const;
-    void printRootInfo() const;
-    bool verifyParentPointers(Node *node) const;
-    bool verifyInternalStructure(Node *node) const;
-    Node *getRoot() const
-    {
-        return root;
-    }
+    // ================================
+    // Basic operations
+    // ================================
+
+    bool insert(
+        int key,
+        const RecordPointer& pointer);
+
+    RecordPointer search(
+        int key);
+
+    // ================================
+    // Day 9 testing
+    // ================================
+
+    bool readRootLeaf(
+        LeafPage& leaf);
+
+    void printRootLeaf() const;
+    
+    bool readLeafPage(
+    int pageId,
+    LeafPage& leaf);
+    
+
+    // ================================
+    // Debug / validation
+    // ================================
+
+    // void printTree() const;
+
+    // void printRootInfo() const;
+
+    // int height() const;
+
+    // bool verifyTree() const;
 };
 
 #endif

@@ -18,4 +18,9 @@ add_executable(
     src/buffer/buffer_pool_manager.cpp
     src/buffer/lru_replacer.cpp
     src/bptree/b_plus_tree.cpp
+    src/bptree/b_plus_tree_page.cpp
+    src/bptree/b_plus_tree_page_io.cpp
+    src/bptree/b_plus_tree_page_manager.cpp
+    src/bptree/b_plus_tree_metadata.cpp
+    src/bptree/b_plus_tree_metadata_io.cpp
 )

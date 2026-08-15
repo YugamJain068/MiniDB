@@ -6,9 +6,14 @@
 struct InternalEntry
 {
     int32_t key;
-
     int32_t childPageId;
 };
+
+constexpr int INTERNAL_MAX_ENTRIES =
+    (PAGE_SIZE
+     - sizeof(BPlusTreePageHeader)
+     - sizeof(int32_t))
+    / sizeof(InternalEntry);
 
 struct InternalPage
 {
@@ -16,7 +21,15 @@ struct InternalPage
 
     int32_t firstChildPageId;
 
-    InternalEntry entries[100];
+    InternalEntry entries[INTERNAL_MAX_ENTRIES];
 };
+
+static_assert(
+    sizeof(InternalPage) <= PAGE_SIZE,
+    "InternalPage exceeds page size");
+
+void initializeInternalPage(
+    InternalPage& page,
+    int32_t pageId);
 
 #endif

@@ -109,9 +109,20 @@ void Executor::executeInsert(InsertStatement *stmt)
         << '\n';
     try
     {
-        database.getIndex().insert(
-            row.id,
-            ptr);
+        bool success =
+            database
+                .getIndex()
+                .insert(
+                    row.id,
+                    ptr);
+
+        if (!success)
+        {
+            std::cout
+                << "Index insertion failed\n";
+
+            return;
+        }
     }
     catch (const std::exception &e)
     {

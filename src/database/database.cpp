@@ -7,7 +7,11 @@
 
 using namespace std;
 
-Database::Database() : bufferPool(2), index(&bufferPool)
+Database::Database()
+    : bufferPool(20),
+      index(
+          &bufferPool,
+          "../data/database.idx")
 {
     ifstream meta("../data/schema.meta");
     if (!meta)
