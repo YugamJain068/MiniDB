@@ -81,9 +81,11 @@ bool BPlusTree::insert(
 
         leaf.header.size = 1;
 
-        leaf.entries[0].key = key;
+        leaf.entries[0].key =
+            key;
 
-        leaf.entries[0].value = pointer;
+        leaf.entries[0].value =
+            pointer;
 
         leaf.nextPageId = -1;
 
@@ -116,13 +118,19 @@ bool BPlusTree::insert(
     }
 
     // =========================================
-    // CASE 2: Existing root
+    // CASE 2: Existing tree
     // =========================================
+
+    int leafPageId =
+        findLeafPage(key);
+
+    if (leafPageId == -1)
+        return false;
 
     LeafPage leaf{};
 
     if (!pageManager.readLeafPage(
-            rootPageId,
+            leafPageId,
             leaf))
     {
         return false;
@@ -186,11 +194,10 @@ bool BPlusTree::insert(
         }
 
         int newLeafPageId;
-
         int separatorKey;
 
         if (!splitLeafPage(
-                rootPageId,
+                leafPageId,
                 temp,
                 LEAF_MAX_ENTRIES + 1,
                 newLeafPageId,
@@ -199,12 +206,42 @@ bool BPlusTree::insert(
             return false;
         }
 
+        // =====================================
+        // Root leaf split
+        // =====================================
+
+        if (leafPageId == rootPageId)
+        {
+            if (!createNewRoot(
+                    leafPageId,
+                    newLeafPageId,
+                    separatorKey))
+            {
+                return false;
+            }
+        }
+
+        // =====================================
+        // Existing internal root
+        // =====================================
+
+        else
+        {
+            if (!insertIntoInternalPage(
+                    rootPageId,
+                    separatorKey,
+                    newLeafPageId))
+            {
+                return false;
+            }
+        }
+
         std::cout
             << "Leaf split successful\n";
 
         std::cout
             << "Left Page: "
-            << rootPageId
+            << leafPageId
             << '\n';
 
         std::cout
@@ -219,8 +256,9 @@ bool BPlusTree::insert(
 
         return true;
     }
+
     // =========================================
-    // Find sorted insertion position
+    // Normal insertion
     // =========================================
 
     int position = 0;
@@ -232,10 +270,7 @@ bool BPlusTree::insert(
         position++;
     }
 
-    // =========================================
     // Shift entries
-    // =========================================
-
     for (int i = leaf.header.size;
          i > position;
          i--)
@@ -244,10 +279,7 @@ bool BPlusTree::insert(
             leaf.entries[i - 1];
     }
 
-    // =========================================
     // Insert
-    // =========================================
-
     leaf.entries[position].key =
         key;
 
@@ -256,12 +288,8 @@ bool BPlusTree::insert(
 
     leaf.header.size++;
 
-    // =========================================
-    // Write page
-    // =========================================
-
     return pageManager.writeLeafPage(
-        rootPageId,
+        leafPageId,
         leaf);
 }
 
@@ -271,10 +299,16 @@ RecordPointer BPlusTree::search(
     if (empty())
         return RecordPointer();
 
+    int leafPageId =
+        findLeafPage(key);
+
+    if (leafPageId == -1)
+        return RecordPointer();
+
     LeafPage leaf{};
 
     if (!pageManager.readLeafPage(
-            rootPageId,
+            leafPageId,
             leaf))
     {
         return RecordPointer();
@@ -449,6 +483,168 @@ bool BPlusTree::readLeafPage(
     return pageManager.readLeafPage(
         pageId,
         leaf);
+}
+
+bool BPlusTree::readInternalPage(
+    int pageId,
+    InternalPage& internal)
+{
+    return pageManager.readInternalPage(
+        pageId,
+        internal);
+}
+
+bool BPlusTree::createNewRoot(
+    int leftPageId,
+    int rightPageId,
+    int separatorKey)
+{
+    int newRootPageId =
+        pageManager.allocateInternalPage();
+
+    if (newRootPageId == -1)
+        return false;
+
+    InternalPage root{};
+
+    if (!pageManager.readInternalPage(
+            newRootPageId,
+            root))
+    {
+        return false;
+    }
+
+    root.header.size = 1;
+
+    root.firstChildPageId =
+        leftPageId;
+
+    root.entries[0].key =
+        separatorKey;
+
+    root.entries[0].childPageId =
+        rightPageId;
+
+    if (!pageManager.writeInternalPage(
+            newRootPageId,
+            root))
+    {
+        return false;
+    }
+
+    rootPageId =
+        newRootPageId;
+
+    return true;
+}
+
+bool BPlusTree::insertIntoInternalPage(
+    int parentPageId,
+    int separatorKey,
+    int rightChildPageId)
+{
+    InternalPage parent{};
+
+    if (!pageManager.readInternalPage(
+            parentPageId,
+            parent))
+    {
+        return false;
+    }
+
+    if (parent.header.size >=
+        INTERNAL_MAX_ENTRIES)
+    {
+        return false;
+    }
+
+    int pos = parent.header.size;
+
+    while (pos > 0 &&
+           parent.entries[pos - 1].key >
+               separatorKey)
+    {
+        parent.entries[pos] =
+            parent.entries[pos - 1];
+
+        pos--;
+    }
+
+    parent.entries[pos].key =
+        separatorKey;
+
+    parent.entries[pos].childPageId =
+        rightChildPageId;
+
+    parent.header.size++;
+
+    return pageManager.writeInternalPage(
+        parentPageId,
+        parent);
+}
+
+int BPlusTree::findLeafPage(
+    int key)
+{
+    int currentPageId =
+        rootPageId;
+
+    while (true)
+    {
+        Page *page =
+            bufferPool->FetchPage(
+                pageManager.getFilename(),
+                currentPageId);
+
+        if (page == nullptr)
+            return -1;
+
+        BPlusTreePageHeader header{};
+
+        deserializePageHeader(
+            *page,
+            header);
+
+        bufferPool->UnpinPage(
+            pageManager.getFilename(),
+            currentPageId);
+
+        if (header.type == BPlusPageType::LEAF)
+        {
+            return currentPageId;
+        }
+
+        InternalPage internal{};
+
+        if (!pageManager.readInternalPage(
+                currentPageId,
+                internal))
+        {
+            return -1;
+        }
+
+        int childPageId =
+            internal.firstChildPageId;
+
+        for (int i = 0;
+             i < internal.header.size;
+             i++)
+        {
+            if (key >=
+                internal.entries[i].key)
+            {
+                childPageId =
+                    internal.entries[i].childPageId;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        currentPageId =
+            childPageId;
+    }
 }
 
 //

@@ -1,4 +1,5 @@
 #include "b_plus_tree_page.h"
+#include <cstring>
 
 void initializeBPlusPage(
     BPlusTreePageHeader& header,
@@ -16,4 +17,14 @@ void initializeBPlusPage(
     header.parentPageId = -1;
 
     header.pageId = pageId;
+}
+
+void deserializePageHeader(
+    const Page& page,
+    BPlusTreePageHeader& header)
+{
+    std::memcpy(
+        &header,
+        page.data,
+        sizeof(BPlusTreePageHeader));
 }

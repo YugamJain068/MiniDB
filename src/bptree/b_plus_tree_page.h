@@ -24,6 +24,10 @@ struct BPlusTreePageHeader
     int32_t pageId;
 };
 
+void deserializePageHeader(
+    const Page& page,
+    BPlusTreePageHeader& header);
+
 void initializeBPlusPage(
     BPlusTreePageHeader& header,
     BPlusPageType type,

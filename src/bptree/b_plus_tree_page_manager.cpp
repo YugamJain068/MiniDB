@@ -12,13 +12,12 @@ BPlusTreePageManager::BPlusTreePageManager(
 
 int BPlusTreePageManager::allocateLeafPage()
 {
+    // Actually create a new page on disk
     int pageId =
-        bufferPool.GetPageCount(filename);
+        bufferPool.AllocatePage(filename);
 
-    if (pageId == 0)
-    {
-        pageId = 0;
-    }
+    if (pageId == -1)
+        return -1;
 
     Page* page =
         bufferPool.FetchPage(
@@ -48,7 +47,6 @@ int BPlusTreePageManager::allocateLeafPage()
 
     return pageId;
 }
-
 
 int BPlusTreePageManager::allocateInternalPage()
 {
