@@ -37,6 +37,11 @@ private:
         int separatorKey,
         int rightChildPageId);
 
+    bool splitInternalPage(
+        int internalPageId,
+        int &newInternalPageId,
+        int &separatorKey);
+
 public:
     BPlusTree(
         BufferPoolManager *bpm,
@@ -70,7 +75,7 @@ public:
     bool readRootLeaf(
         LeafPage &leaf);
 
-        void printRootLeaf() const;
+    void printRootLeaf() const;
 
     bool readLeafPage(
         int pageId,

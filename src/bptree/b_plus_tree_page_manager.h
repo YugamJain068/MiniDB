@@ -49,6 +49,10 @@ public:
         const BPlusTreeMetadata &metadata);
 
     const std::string& getFilename() const;
+
+    bool setParentPageId(
+    int pageId,
+    int parentPageId);
 };
 
 #endif

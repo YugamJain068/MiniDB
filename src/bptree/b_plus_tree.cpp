@@ -227,8 +227,14 @@ bool BPlusTree::insert(
 
         else
         {
+            int parentPageId =
+                leaf.header.parentPageId;
+
+            if (parentPageId == -1)
+                return false;
+
             if (!insertIntoInternalPage(
-                    rootPageId,
+                    parentPageId,
                     separatorKey,
                     newLeafPageId))
             {
@@ -405,6 +411,7 @@ bool BPlusTree::splitLeafPage(
     {
         return false;
     }
+    newLeaf.header.parentPageId = oldLeaf.header.parentPageId;
 
     int mid =
         entryCount / 2;
@@ -487,7 +494,7 @@ bool BPlusTree::readLeafPage(
 
 bool BPlusTree::readInternalPage(
     int pageId,
-    InternalPage& internal)
+    InternalPage &internal)
 {
     return pageManager.readInternalPage(
         pageId,
@@ -513,7 +520,7 @@ bool BPlusTree::createNewRoot(
     {
         return false;
     }
-
+    root.header.parentPageId = -1;
     root.header.size = 1;
 
     root.firstChildPageId =
@@ -532,8 +539,37 @@ bool BPlusTree::createNewRoot(
         return false;
     }
 
-    rootPageId =
+    if (!pageManager.setParentPageId(
+            leftPageId,
+            newRootPageId))
+    {
+        return false;
+    }
+
+    if (!pageManager.setParentPageId(
+            rightPageId,
+            newRootPageId))
+    {
+        return false;
+    }
+
+    BPlusTreeMetadata metadata{};
+
+    if (!pageManager.readMetadata(
+            metadata))
+    {
+        return false;
+    }
+
+    metadata.rootPageId =
         newRootPageId;
+
+    if (!pageManager.writeMetadata(
+            metadata))
+    {
+        return false;
+    }
+    rootPageId = newRootPageId;
 
     return true;
 }
@@ -552,35 +588,261 @@ bool BPlusTree::insertIntoInternalPage(
         return false;
     }
 
-    if (parent.header.size >=
+    // ==================================================
+    // CASE 1: Parent has space
+    // ==================================================
+
+    if (parent.header.size <
         INTERNAL_MAX_ENTRIES)
     {
-        return false;
+        int pos =
+            parent.header.size;
+
+        while (pos > 0 &&
+               parent.entries[pos - 1].key >
+                   separatorKey)
+        {
+            parent.entries[pos] =
+                parent.entries[pos - 1];
+
+            pos--;
+        }
+
+        parent.entries[pos].key =
+            separatorKey;
+
+        parent.entries[pos].childPageId =
+            rightChildPageId;
+
+        parent.header.size++;
+
+        if (!pageManager.writeInternalPage(
+                parentPageId,
+                parent))
+        {
+            return false;
+        }
+
+        // The newly inserted right child now belongs
+        // to this parent.
+        if (!pageManager.setParentPageId(
+                rightChildPageId,
+                parentPageId))
+        {
+            return false;
+        }
+
+        return true;
     }
 
-    int pos = parent.header.size;
+    // ==================================================
+    // CASE 2: Parent is full
+    //
+    // Build temporary N+1 entries.
+    // ==================================================
+
+    InternalEntry tempEntries[INTERNAL_MAX_ENTRIES + 1];
+
+    int tempSize =
+        parent.header.size;
+
+    for (int i = 0;
+         i < tempSize;
+         i++)
+    {
+        tempEntries[i] =
+            parent.entries[i];
+    }
+
+    // ==================================================
+    // Insert new separator into temporary array
+    // ==================================================
+
+    int pos = tempSize;
 
     while (pos > 0 &&
-           parent.entries[pos - 1].key >
+           tempEntries[pos - 1].key >
                separatorKey)
     {
-        parent.entries[pos] =
-            parent.entries[pos - 1];
+        tempEntries[pos] =
+            tempEntries[pos - 1];
 
         pos--;
     }
 
-    parent.entries[pos].key =
+    tempEntries[pos].key =
         separatorKey;
 
-    parent.entries[pos].childPageId =
+    tempEntries[pos].childPageId =
         rightChildPageId;
 
-    parent.header.size++;
+    tempSize++;
 
-    return pageManager.writeInternalPage(
-        parentPageId,
-        parent);
+    // ==================================================
+    // Split temporary entries
+    // ==================================================
+
+    int mid =
+        tempSize / 2;
+
+    int promotedKey =
+        tempEntries[mid].key;
+
+    // ==================================================
+    // Allocate new internal page
+    // ==================================================
+
+    int newInternalPageId =
+        pageManager.allocateInternalPage();
+
+    if (newInternalPageId == -1)
+        return false;
+
+    InternalPage newPage{};
+
+    if (!pageManager.readInternalPage(
+            newInternalPageId,
+            newPage))
+    {
+        return false;
+    }
+
+    // ==================================================
+    // LEFT PAGE
+    //
+    // Old parent keeps:
+    //
+    // firstChild
+    // entries[0 ... mid-1]
+    // ==================================================
+
+    parent.header.size =
+        mid;
+
+    // ==================================================
+    // RIGHT PAGE
+    //
+    // Promoted key is NOT copied.
+    //
+    // Its child becomes the first child of right page.
+    // ==================================================
+
+    newPage.header.parentPageId =
+        parent.header.parentPageId;
+
+    newPage.firstChildPageId =
+        tempEntries[mid].childPageId;
+
+    newPage.header.size =
+        tempSize - mid - 1;
+
+    for (int i = mid + 1;
+         i < tempSize;
+         i++)
+    {
+        newPage.entries[i - mid - 1] =
+            tempEntries[i];
+    }
+
+    // ==================================================
+    // Write pages
+    // ==================================================
+
+    if (!pageManager.writeInternalPage(
+            parentPageId,
+            parent))
+    {
+        return false;
+    }
+
+    if (!pageManager.writeInternalPage(
+            newInternalPageId,
+            newPage))
+    {
+        return false;
+    }
+
+    // ==================================================
+    // Update parent pointers of children moved
+    // to the new internal page.
+    // ==================================================
+
+    if (!pageManager.setParentPageId(
+            newPage.firstChildPageId,
+            newInternalPageId))
+    {
+        return false;
+    }
+
+    for (int i = 0;
+         i < newPage.header.size;
+         i++)
+    {
+        if (!pageManager.setParentPageId(
+                newPage.entries[i].childPageId,
+                newInternalPageId))
+        {
+            return false;
+        }
+    }
+
+    // ==================================================
+    // The right child inserted by the original leaf
+    // split might be on either side.
+    //
+    // Its parent has already been updated above if
+    // it belongs to the right internal page.
+    // ==================================================
+
+    if (separatorKey >= promotedKey)
+    {
+        if (!pageManager.setParentPageId(
+                rightChildPageId,
+                newInternalPageId))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        if (!pageManager.setParentPageId(
+                rightChildPageId,
+                parentPageId))
+        {
+            return false;
+        }
+    }
+
+    // ==================================================
+    // IMPORTANT:
+    //
+    // The promoted separator now has to be inserted
+    // into THIS internal page's parent.
+    // ==================================================
+
+    int grandParentPageId =
+        parent.header.parentPageId;
+
+    // ==================================================
+    // Parent was ROOT
+    // ==================================================
+
+    if (grandParentPageId == -1)
+    {
+        return createNewRoot(
+            parentPageId,
+            newInternalPageId,
+            promotedKey);
+    }
+
+    // ==================================================
+    // Parent was NOT root
+    // ==================================================
+
+    return insertIntoInternalPage(
+        grandParentPageId,
+        promotedKey,
+        newInternalPageId);
 }
 
 int BPlusTree::findLeafPage(

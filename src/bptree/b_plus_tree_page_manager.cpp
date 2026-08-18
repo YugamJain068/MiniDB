@@ -303,3 +303,41 @@ BPlusTreePageManager::getFilename() const
 {
     return filename;
 }
+
+bool BPlusTreePageManager::setParentPageId(
+    int pageId,
+    int parentPageId)
+{
+    Page* page =
+        bufferPool.FetchPage(
+            filename,
+            pageId);
+
+    if (page == nullptr)
+        return false;
+
+    BPlusTreePageHeader header{};
+
+    std::memcpy(
+        &header,
+        page->data,
+        sizeof(BPlusTreePageHeader));
+
+    header.parentPageId =
+        parentPageId;
+
+    std::memcpy(
+        page->data,
+        &header,
+        sizeof(BPlusTreePageHeader));
+
+    bufferPool.MarkDirty(
+        filename,
+        pageId);
+
+    bufferPool.UnpinPage(
+        filename,
+        pageId);
+
+    return true;
+}

@@ -1796,7 +1796,6 @@
 //     std::cout
 //         << "========================================\n";
 
-
 //     // =========================================================
 //     // Create Buffer Pool
 //     // =========================================================
@@ -1806,7 +1805,6 @@
 //     BPlusTree tree(
 //         &bpm,
 //         filename);
-
 
 //     // =========================================================
 //     // Initialize Index
@@ -1822,7 +1820,6 @@
 
 //     std::cout
 //         << "Initialization: PASS\n";
-
 
 //     // =========================================================
 //     // Insert LEAF_MAX_ENTRIES + 1 keys
@@ -1876,7 +1873,6 @@
 //     std::cout
 //         << "Sequential insertion: PASS\n";
 
-
 //     // =========================================================
 //     // Read LEFT leaf
 //     // =========================================================
@@ -1892,7 +1888,6 @@
 //         return 1;
 //     }
 
-
 //     // =========================================================
 //     // Root should still be the left leaf
 //     //
@@ -1905,7 +1900,6 @@
 //     int rightPageId =
 //         leftLeaf.nextPageId;
 
-
 //     std::cout
 //         << "\nLeft Page ID: "
 //         << leftPageId
@@ -1915,7 +1909,6 @@
 //         << "Right Page ID: "
 //         << rightPageId
 //         << '\n';
-
 
 //     // =========================================================
 //     // Verify right leaf exists
@@ -1931,7 +1924,6 @@
 
 //     std::cout
 //         << "Leaf split occurred: PASS\n";
-
 
 //     // =========================================================
 //     // Read RIGHT leaf
@@ -1951,7 +1943,6 @@
 
 //     std::cout
 //         << "Right leaf read: PASS\n";
-
 
 //     // =========================================================
 //     // Print sizes
@@ -1973,7 +1964,6 @@
 //            + rightLeaf.header.size
 //         << '\n';
 
-
 //     // =========================================================
 //     // Verify total entries
 //     // =========================================================
@@ -1993,7 +1983,6 @@
 //             << "Total entry count: PASS\n";
 //     }
 
-
 //     // =========================================================
 //     // Verify both leaves are non-empty
 //     // =========================================================
@@ -2011,7 +2000,6 @@
 //         std::cout
 //             << "Non-empty leaves: PASS\n";
 //     }
-
 
 //     // =========================================================
 //     // Verify leaf chain
@@ -2032,7 +2020,6 @@
 //             << "Leaf chain left -> right: PASS\n";
 //     }
 
-
 //     if (rightLeaf.nextPageId != -1)
 //     {
 //         std::cout
@@ -2045,7 +2032,6 @@
 //         std::cout
 //             << "Leaf chain termination: PASS\n";
 //     }
-
 
 //     // =========================================================
 //     // Verify key ordering inside LEFT leaf
@@ -2072,7 +2058,6 @@
 //         std::cout
 //             << "Left leaf ordering: PASS\n";
 //     }
-
 
 //     // =========================================================
 //     // Verify key ordering inside RIGHT leaf
@@ -2105,7 +2090,6 @@
 //             << "Right leaf ordering: PASS\n";
 //     }
 
-
 //     // =========================================================
 //     // Verify boundary
 //     //
@@ -2133,7 +2117,6 @@
 //         << rightFirstKey
 //         << '\n';
 
-
 //     if (leftLastKey >= rightFirstKey)
 //     {
 //         std::cout
@@ -2147,7 +2130,6 @@
 //             << "Leaf boundary ordering: PASS\n";
 //     }
 
-
 //     // =========================================================
 //     // Verify all keys
 //     //
@@ -2158,7 +2140,6 @@
 //     int expectedKey = 1;
 
 //     bool keysCorrect = true;
-
 
 //     // LEFT
 
@@ -2186,7 +2167,6 @@
 
 //         expectedKey++;
 //     }
-
 
 //     // RIGHT
 
@@ -2218,7 +2198,6 @@
 //         }
 //     }
 
-
 //     if (!keysCorrect)
 //     {
 //         std::cout
@@ -2232,7 +2211,6 @@
 //             << "All keys present: PASS\n";
 //     }
 
-
 //     // =========================================================
 //     // Verify RecordPointers
 //     // =========================================================
@@ -2240,7 +2218,6 @@
 //     bool pointersCorrect = true;
 
 //     expectedKey = 1;
-
 
 //     for (int i = 0;
 //          i < leftLeaf.header.size;
@@ -2257,7 +2234,6 @@
 
 //         expectedKey++;
 //     }
-
 
 //     if (pointersCorrect)
 //     {
@@ -2278,7 +2254,6 @@
 //         }
 //     }
 
-
 //     if (!pointersCorrect)
 //     {
 //         std::cout
@@ -2291,7 +2266,6 @@
 //         std::cout
 //             << "RecordPointer validation: PASS\n";
 //     }
-
 
 //     // =========================================================
 //     // Print split
@@ -2330,7 +2304,6 @@
 //     std::cout
 //         << "]\n";
 
-
 //     // =========================================================
 //     // Flush to disk
 //     // =========================================================
@@ -2339,7 +2312,6 @@
 
 //     std::cout
 //         << "\nDisk flush completed.\n";
-
 
 //     // =========================================================
 //     // Final in-process result
@@ -2362,10 +2334,8 @@
 //         return 1;
 //     }
 
-
 //     return 0;
 // }
-
 
 // #include <iostream>
 // #include <cstdio>
@@ -2832,10 +2802,1426 @@
 //     std::cout
 //         << "\nDisk flush completed.\n";
 
+//     return allPassed ? 0 : 1;
+// }
+
+// #include <iostream>
+// #include <cstdio>
+
+// #include "buffer/buffer_pool_manager.h"
+// #include "bptree/b_plus_tree.h"
+// #include "bptree/b_plus_tree_internal_page.h"
+// #include "bptree/b_plus_tree_leaf_page.h"
+// #include "storage/record_pointer.h"
+
+// int main()
+// {
+//     const std::string filename =
+//         "../data/day13_test.idx";
+
+//     // ==========================================
+//     // Remove old test file
+//     // ==========================================
+
+//     std::remove(filename.c_str());
+
+//     std::cout
+//         << "\n========================================\n"
+//         << "DAY 13: MULTIPLE LEAF SPLITS TEST\n"
+//         << "========================================\n\n";
+
+//     // ==========================================
+//     // Buffer Pool
+//     // ==========================================
+
+//     BufferPoolManager bpm(10);
+
+//     // ==========================================
+//     // B+ Tree
+//     // ==========================================
+
+//     BPlusTree tree(
+//         &bpm,
+//         filename);
+
+//     if (!tree.initialize())
+//     {
+//         std::cout
+//             << "Tree initialization: FAIL\n";
+
+//         return 1;
+//     }
+
+//     std::cout
+//         << "Tree initialization: PASS\n";
+
+//     // ==========================================
+//     // Insert 1 -> 510
+//     //
+//     // 170 entries per leaf
+//     //
+//     // Expected:
+//     //
+//     // Leaf 1 = 1..170
+//     // Leaf 2 = 171..340
+//     // Leaf 3 = 341..510
+//     //
+//     // Root:
+//     //
+//     //          [171 | 341]
+//     //         /     |     \
+//     //        L1     L2     L3
+//     // ==========================================
+
+//     const int totalKeys = 510;
+
+//     bool insertSuccess = true;
+
+//     for (int key = 1;
+//          key <= totalKeys;
+//          key++)
+//     {
+//         RecordPointer pointer;
+
+//         pointer.pageId = key;
+//         pointer.slotId = key;
+
+//         if (!tree.insert(
+//                 key,
+//                 pointer))
+//         {
+//             std::cout
+//                 << "Insert failed for key: "
+//                 << key
+//                 << '\n';
+
+//             insertSuccess = false;
+//             break;
+//         }
+//     }
+
+//     std::cout
+//         << "\nInserted "
+//         << totalKeys
+//         << " keys: "
+//         << (insertSuccess
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     if (!insertSuccess)
+//     {
+//         return 1;
+//     }
+
+//     // ==========================================
+//     // Root
+//     // ==========================================
+
+//     int rootPageId =
+//         tree.getRootPageId();
+
+//     std::cout
+//         << "\nRoot Page ID: "
+//         << rootPageId
+//         << '\n';
+
+//     // ==========================================
+//     // Read root
+//     // ==========================================
+
+//     InternalPage root{};
+
+//     bool rootRead =
+//         tree.readInternalPage(
+//             rootPageId,
+//             root);
+
+//     std::cout
+//         << "Root read: "
+//         << (rootRead
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     if (!rootRead)
+//     {
+//         return 1;
+//     }
+
+//     // ==========================================
+//     // Print root
+//     // ==========================================
+
+//     std::cout
+//         << "\n========== ROOT INFORMATION ==========\n";
+
+//     std::cout
+//         << "Root Page ID: "
+//         << rootPageId
+//         << '\n';
+
+//     std::cout
+//         << "Root Size: "
+//         << root.header.size
+//         << '\n';
+
+//     std::cout
+//         << "First Child Page ID: "
+//         << root.firstChildPageId
+//         << '\n';
+
+//     for (int i = 0;
+//          i < root.header.size;
+//          i++)
+//     {
+//         std::cout
+//             << "Entry "
+//             << i
+//             << ": Key = "
+//             << root.entries[i].key
+//             << ", Child = "
+//             << root.entries[i].childPageId
+//             << '\n';
+//     }
+
+//     // ==========================================
+//     // Root validation
+//     // ==========================================
+
+//     bool rootSizeCorrect =
+//         root.header.size == 2;
+
+//     bool firstSeparatorCorrect =
+//         root.header.size >= 2 &&
+//         root.entries[0].key == 171;
+
+//     bool secondSeparatorCorrect =
+//         root.header.size >= 2 &&
+//         root.entries[1].key == 341;
+
+//     bool firstChildValid =
+//         root.firstChildPageId != -1;
+
+//     bool secondChildValid =
+//         root.header.size >= 1 &&
+//         root.entries[0].childPageId != -1;
+
+//     bool thirdChildValid =
+//         root.header.size >= 2 &&
+//         root.entries[1].childPageId != -1;
+
+//     std::cout
+//         << "\nRoot size: "
+//         << (rootSizeCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "First separator (171): "
+//         << (firstSeparatorCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "Second separator (341): "
+//         << (secondSeparatorCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "First child pointer: "
+//         << (firstChildValid
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "Second child pointer: "
+//         << (secondChildValid
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "Third child pointer: "
+//         << (thirdChildValid
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     // ==========================================
+//     // Read all three leaves
+//     // ==========================================
+
+//     int leaf1PageId =
+//         root.firstChildPageId;
+
+//     int leaf2PageId =
+//         root.entries[0].childPageId;
+
+//     int leaf3PageId =
+//         root.entries[1].childPageId;
+
+//     LeafPage leaf1{};
+//     LeafPage leaf2{};
+//     LeafPage leaf3{};
+
+//     bool leaf1Read =
+//         tree.readLeafPage(
+//             leaf1PageId,
+//             leaf1);
+
+//     bool leaf2Read =
+//         tree.readLeafPage(
+//             leaf2PageId,
+//             leaf2);
+
+//     bool leaf3Read =
+//         tree.readLeafPage(
+//             leaf3PageId,
+//             leaf3);
+
+//     std::cout
+//         << "\n========== LEAF READ ==========\n";
+
+//     std::cout
+//         << "Leaf 1 read: "
+//         << (leaf1Read
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "Leaf 2 read: "
+//         << (leaf2Read
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "Leaf 3 read: "
+//         << (leaf3Read
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     // ==========================================
+//     // Leaf sizes
+//     // ==========================================
+
+//     bool leaf1SizeCorrect =
+//         leaf1Read &&
+//         leaf1.header.size == 170;
+
+//     bool leaf2SizeCorrect =
+//         leaf2Read &&
+//         leaf2.header.size == 170;
+
+//     bool leaf3SizeCorrect =
+//         leaf3Read &&
+//         leaf3.header.size == 170;
+
+//     std::cout
+//         << "\n========== LEAF SIZES ==========\n";
+
+//     std::cout
+//         << "Leaf 1 size: "
+//         << (leaf1SizeCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "Leaf 2 size: "
+//         << (leaf2SizeCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "Leaf 3 size: "
+//         << (leaf3SizeCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     // ==========================================
+//     // Leaf boundaries
+//     // ==========================================
+
+//     bool boundary1Correct =
+//         leaf1Read &&
+//         leaf2Read &&
+//         leaf1.entries[
+//             leaf1.header.size - 1
+//         ].key == 170 &&
+//         leaf2.entries[0].key == 171;
+
+//     bool boundary2Correct =
+//         leaf2Read &&
+//         leaf3Read &&
+//         leaf2.entries[
+//             leaf2.header.size - 1
+//         ].key == 340 &&
+//         leaf3.entries[0].key == 341;
+
+//     std::cout
+//         << "\n========== LEAF BOUNDARIES ==========\n";
+
+//     std::cout
+//         << "170 -> 171 boundary: "
+//         << (boundary1Correct
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "340 -> 341 boundary: "
+//         << (boundary2Correct
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     // ==========================================
+//     // Leaf chain
+//     // ==========================================
+
+//     bool chainCorrect =
+//         leaf1Read &&
+//         leaf2Read &&
+//         leaf3Read &&
+//         leaf1.nextPageId == leaf2PageId &&
+//         leaf2.nextPageId == leaf3PageId &&
+//         leaf3.nextPageId == -1;
+
+//     std::cout
+//         << "\nLeaf chain: "
+//         << (chainCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     // ==========================================
+//     // Check sorted ordering inside leaves
+//     // ==========================================
+
+//     bool orderingCorrect = true;
+
+//     for (int i = 1;
+//          i < leaf1.header.size;
+//          i++)
+//     {
+//         if (leaf1.entries[i - 1].key >=
+//             leaf1.entries[i].key)
+//         {
+//             orderingCorrect = false;
+//             break;
+//         }
+//     }
+
+//     for (int i = 1;
+//          i < leaf2.header.size;
+//          i++)
+//     {
+//         if (leaf2.entries[i - 1].key >=
+//             leaf2.entries[i].key)
+//         {
+//             orderingCorrect = false;
+//             break;
+//         }
+//     }
+
+//     for (int i = 1;
+//          i < leaf3.header.size;
+//          i++)
+//     {
+//         if (leaf3.entries[i - 1].key >=
+//             leaf3.entries[i].key)
+//         {
+//             orderingCorrect = false;
+//             break;
+//         }
+//     }
+
+//     std::cout
+//         << "Leaf ordering: "
+//         << (orderingCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     // ==========================================
+//     // Check ALL keys
+//     // ==========================================
+
+//     bool allKeysPresent = true;
+
+//     for (int key = 1;
+//          key <= totalKeys;
+//          key++)
+//     {
+//         RecordPointer result =
+//             tree.search(key);
+
+//         if (result.pageId != key ||
+//             result.slotId != key)
+//         {
+//             std::cout
+//                 << "Search failed for key: "
+//                 << key
+//                 << '\n';
+
+//             allKeysPresent = false;
+//             break;
+//         }
+//     }
+
+//     std::cout
+//         << "\nAll keys searchable: "
+//         << (allKeysPresent
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     // ==========================================
+//     // Boundary searches
+//     // ==========================================
+
+//     int testKeys[] =
+//     {
+//         1,
+//         170,
+//         171,
+//         200,
+//         340,
+//         341,
+//         400,
+//         510
+//     };
+
+//     bool boundarySearchCorrect = true;
+
+//     for (int key : testKeys)
+//     {
+//         RecordPointer result =
+//             tree.search(key);
+
+//         if (result.pageId != key ||
+//             result.slotId != key)
+//         {
+//             boundarySearchCorrect = false;
+
+//             std::cout
+//                 << "Boundary search failed: "
+//                 << key
+//                 << '\n';
+//         }
+//     }
+
+//     std::cout
+//         << "Boundary searches: "
+//         << (boundarySearchCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     // ==========================================
+//     // Print final tree
+//     // ==========================================
+
+//     std::cout
+//         << "\n========== TREE STRUCTURE ==========\n\n";
+
+//     std::cout
+//         << "                    Root: "
+//         << rootPageId
+//         << '\n';
+
+//     std::cout
+//         << "                 ["
+//         << root.entries[0].key
+//         << " | "
+//         << root.entries[1].key
+//         << "]\n";
+
+//     std::cout
+//         << "                /     |     \\\n";
+
+//     std::cout
+//         << "               /      |      \\\n";
+
+//     std::cout
+//         << "          Leaf: "
+//         << leaf1PageId
+//         << "  Leaf: "
+//         << leaf2PageId
+//         << "  Leaf: "
+//         << leaf3PageId
+//         << '\n';
+
+//     std::cout
+//         << "         [1..170] [171..340] [341..510]\n";
+
+//     // ==========================================
+//     // Final result
+//     // ==========================================
+
+//     bool allPassed =
+//         insertSuccess &&
+//         rootRead &&
+//         rootSizeCorrect &&
+//         firstSeparatorCorrect &&
+//         secondSeparatorCorrect &&
+//         firstChildValid &&
+//         secondChildValid &&
+//         thirdChildValid &&
+//         leaf1Read &&
+//         leaf2Read &&
+//         leaf3Read &&
+//         leaf1SizeCorrect &&
+//         leaf2SizeCorrect &&
+//         leaf3SizeCorrect &&
+//         boundary1Correct &&
+//         boundary2Correct &&
+//         chainCorrect &&
+//         orderingCorrect &&
+//         allKeysPresent &&
+//         boundarySearchCorrect;
+
+//     std::cout
+//         << "\n========================================\n";
+
+//     if (allPassed)
+//     {
+//         std::cout
+//             << "DAY 13: MULTIPLE LEAF SPLITS PASS\n";
+//     }
+//     else
+//     {
+//         std::cout
+//             << "DAY 13: MULTIPLE LEAF SPLITS FAIL\n";
+//     }
+
+//     std::cout
+//         << "========================================\n";
+
+//     // ==========================================
+//     // Disk flush
+//     // ==========================================
+
+//     bpm.FlushAllPages();
+
+//     std::cout
+//         << "\nDisk flush completed.\n";
 
 //     return allPassed ? 0 : 1;
 // }
 
+// #include <iostream>
+// #include <cstdio>
+
+// #include "buffer/buffer_pool_manager.h"
+// #include "bptree/b_plus_tree.h"
+// #include "bptree/b_plus_tree_internal_page.h"
+// #include "bptree/b_plus_tree_leaf_page.h"
+// #include "storage/record_pointer.h"
+
+// int main()
+// {
+//     const std::string filename =
+//         "../data/day14_test.idx";
+
+//     // ==========================================
+//     // Remove old test file
+//     // ==========================================
+
+//     std::remove(filename.c_str());
+
+//     std::cout
+//         << "\n========================================\n"
+//         << "DAY 14: PARENT POINTER TEST\n"
+//         << "========================================\n\n";
+
+//     // ==========================================
+//     // Buffer Pool
+//     // ==========================================
+
+//     BufferPoolManager bpm(10);
+
+//     // ==========================================
+//     // B+ Tree
+//     // ==========================================
+
+//     BPlusTree tree(
+//         &bpm,
+//         filename);
+
+//     if (!tree.initialize())
+//     {
+//         std::cout
+//             << "Tree initialization: FAIL\n";
+
+//         return 1;
+//     }
+
+//     std::cout
+//         << "Tree initialization: PASS\n";
+
+//     // ==========================================
+//     // DAY 13 BASE TREE
+//     //
+//     // Expected:
+//     //
+//     //              Root
+//     //           [171 | 341]
+//     //          /     |     \
+//     //       L1      L2      L3
+//     //
+//     //       1..170
+//     //       171..340
+//     //       341..510
+//     // ==========================================
+
+//     bool insertSuccess = true;
+
+//     for (int key = 1;
+//          key <= 510;
+//          key++)
+//     {
+//         RecordPointer pointer;
+
+//         pointer.pageId = key;
+//         pointer.slotId = key;
+
+//         if (!tree.insert(
+//                 key,
+//                 pointer))
+//         {
+//             std::cout
+//                 << "Insert failed for key: "
+//                 << key
+//                 << '\n';
+
+//             insertSuccess = false;
+//             break;
+//         }
+//     }
+
+//     std::cout
+//         << "\nInsert 1..510: "
+//         << (insertSuccess
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     if (!insertSuccess)
+//     {
+//         return 1;
+//     }
+
+//     // ==========================================
+//     // Get root
+//     // ==========================================
+
+//     int rootPageId =
+//         tree.getRootPageId();
+
+//     std::cout
+//         << "Root Page ID: "
+//         << rootPageId
+//         << '\n';
+
+//     // ==========================================
+//     // Read root
+//     // ==========================================
+
+//     InternalPage root{};
+
+//     bool rootRead =
+//         tree.readInternalPage(
+//             rootPageId,
+//             root);
+
+//     std::cout
+//         << "Root read: "
+//         << (rootRead
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     if (!rootRead)
+//     {
+//         return 1;
+//     }
+
+//     // ==========================================
+//     // Root parent should be -1
+//     // ==========================================
+
+//     bool rootParentCorrect =
+//         root.header.parentPageId == -1;
+
+//     std::cout
+//         << "\nRoot parent (-1): "
+//         << (rootParentCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     // ==========================================
+//     // Root information
+//     // ==========================================
+
+//     std::cout
+//         << "\n========== INITIAL ROOT ==========\n";
+
+//     std::cout
+//         << "Root ID: "
+//         << rootPageId
+//         << '\n';
+
+//     std::cout
+//         << "Root parent: "
+//         << root.header.parentPageId
+//         << '\n';
+
+//     std::cout
+//         << "Root size: "
+//         << root.header.size
+//         << '\n';
+
+//     std::cout
+//         << "First child: "
+//         << root.firstChildPageId
+//         << '\n';
+
+//     for (int i = 0;
+//          i < root.header.size;
+//          i++)
+//     {
+//         std::cout
+//             << "Entry "
+//             << i
+//             << ": key="
+//             << root.entries[i].key
+//             << ", child="
+//             << root.entries[i].childPageId
+//             << '\n';
+//     }
+
+//     // ==========================================
+//     // Get first three leaves
+//     // ==========================================
+
+//     int leaf1PageId =
+//         root.firstChildPageId;
+
+//     int leaf2PageId =
+//         root.entries[0].childPageId;
+
+//     int leaf3PageId =
+//         root.entries[1].childPageId;
+
+//     LeafPage leaf1{};
+//     LeafPage leaf2{};
+//     LeafPage leaf3{};
+
+//     bool leaf1Read =
+//         tree.readLeafPage(
+//             leaf1PageId,
+//             leaf1);
+
+//     bool leaf2Read =
+//         tree.readLeafPage(
+//             leaf2PageId,
+//             leaf2);
+
+//     bool leaf3Read =
+//         tree.readLeafPage(
+//             leaf3PageId,
+//             leaf3);
+
+//     // ==========================================
+//     // Verify initial parent pointers
+//     // ==========================================
+
+//     bool leaf1ParentCorrect =
+//         leaf1Read &&
+//         leaf1.header.parentPageId ==
+//             rootPageId;
+
+//     bool leaf2ParentCorrect =
+//         leaf2Read &&
+//         leaf2.header.parentPageId ==
+//             rootPageId;
+
+//     bool leaf3ParentCorrect =
+//         leaf3Read &&
+//         leaf3.header.parentPageId ==
+//             rootPageId;
+
+//     std::cout
+//         << "\n========== INITIAL PARENT POINTERS ==========\n";
+
+//     std::cout
+//         << "Leaf 1 parent: "
+//         << (leaf1ParentCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << " ("
+//         << leaf1.header.parentPageId
+//         << ")\n";
+
+//     std::cout
+//         << "Leaf 2 parent: "
+//         << (leaf2ParentCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << " ("
+//         << leaf2.header.parentPageId
+//         << ")\n";
+
+//     std::cout
+//         << "Leaf 3 parent: "
+//         << (leaf3ParentCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << " ("
+//         << leaf3.header.parentPageId
+//         << ")\n";
+
+//     // ==========================================
+//     // DAY 14:
+//     //
+//     // Insert 511..680
+//     //
+//     // This fills Leaf 3:
+//     //
+//     // Leaf 3 currently = 341..510
+//     //
+//     // 511..680 = 170 new entries
+//     //
+//     // When Leaf 3 reaches 341 entries,
+//     // it splits.
+//     //
+//     // Expected:
+//     //
+//     //              Root
+//     //       [171 | 341 | 511]
+//     //       /     |     |     \
+//     //      L1     L2    L3      L4
+//     //
+//     // 1..170
+//     // 171..340
+//     // 341..510
+//     // 511..680
+//     // ==========================================
+
+//     bool additionalInsertSuccess = true;
+
+//     for (int key = 511;
+//          key <= 680;
+//          key++)
+//     {
+//         RecordPointer pointer;
+
+//         pointer.pageId = key;
+//         pointer.slotId = key;
+
+//         if (!tree.insert(
+//                 key,
+//                 pointer))
+//         {
+//             std::cout
+//                 << "Additional insert failed for key: "
+//                 << key
+//                 << '\n';
+
+//             additionalInsertSuccess = false;
+//             break;
+//         }
+//     }
+
+//     std::cout
+//         << "\nInsert 511..680: "
+//         << (additionalInsertSuccess
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     if (!additionalInsertSuccess)
+//     {
+//         return 1;
+//     }
+
+//     // ==========================================
+//     // Root should remain same
+//     // ==========================================
+
+//     int newRootPageId =
+//         tree.getRootPageId();
+
+//     bool rootUnchanged =
+//         newRootPageId == rootPageId;
+
+//     std::cout
+//         << "Root unchanged: "
+//         << (rootUnchanged
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     // ==========================================
+//     // Read updated root
+//     // ==========================================
+
+//     InternalPage newRoot{};
+
+//     bool newRootRead =
+//         tree.readInternalPage(
+//             newRootPageId,
+//             newRoot);
+
+//     std::cout
+//         << "Updated root read: "
+//         << (newRootRead
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     if (!newRootRead)
+//     {
+//         return 1;
+//     }
+
+//     // ==========================================
+//     // Root validation
+//     // ==========================================
+
+//     bool rootSizeCorrect =
+//         newRoot.header.size == 3;
+
+//     bool separator1Correct =
+//         newRoot.entries[0].key == 171;
+
+//     bool separator2Correct =
+//         newRoot.entries[1].key == 341;
+
+//     bool separator3Correct =
+//         newRoot.entries[2].key == 511;
+
+//     bool rootParentStillCorrect =
+//         newRoot.header.parentPageId == -1;
+
+//     std::cout
+//         << "\n========== UPDATED ROOT ==========\n";
+
+//     std::cout
+//         << "Root size = 3: "
+//         << (rootSizeCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "Separator 171: "
+//         << (separator1Correct
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "Separator 341: "
+//         << (separator2Correct
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "Separator 511: "
+//         << (separator3Correct
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "Root parent (-1): "
+//         << (rootParentStillCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     // ==========================================
+//     // Get fourth leaf
+//     // ==========================================
+
+//     int leaf4PageId =
+//         newRoot.entries[2].childPageId;
+
+//     LeafPage leaf4{};
+
+//     bool leaf4Read =
+//         tree.readLeafPage(
+//             leaf4PageId,
+//             leaf4);
+
+//     std::cout
+//         << "\nFourth leaf read: "
+//         << (leaf4Read
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     // ==========================================
+//     // Re-read leaves
+//     //
+//     // Leaf 3 may have been modified
+//     // during the split.
+//     // ==========================================
+
+//     LeafPage updatedLeaf1{};
+//     LeafPage updatedLeaf2{};
+//     LeafPage updatedLeaf3{};
+
+//     tree.readLeafPage(
+//         leaf1PageId,
+//         updatedLeaf1);
+
+//     tree.readLeafPage(
+//         leaf2PageId,
+//         updatedLeaf2);
+
+//     tree.readLeafPage(
+//         leaf3PageId,
+//         updatedLeaf3);
+
+//     // ==========================================
+//     // Parent pointer validation
+//     // ==========================================
+
+//     bool updatedLeaf1Parent =
+//         updatedLeaf1.header.parentPageId ==
+//         newRootPageId;
+
+//     bool updatedLeaf2Parent =
+//         updatedLeaf2.header.parentPageId ==
+//         newRootPageId;
+
+//     bool updatedLeaf3Parent =
+//         updatedLeaf3.header.parentPageId ==
+//         newRootPageId;
+
+//     bool leaf4Parent =
+//         leaf4Read &&
+//         leaf4.header.parentPageId ==
+//             newRootPageId;
+
+//     std::cout
+//         << "\n========== FINAL PARENT POINTERS ==========\n";
+
+//     std::cout
+//         << "Leaf 1 parent: "
+//         << (updatedLeaf1Parent
+//                 ? "PASS"
+//                 : "FAIL")
+//         << " ("
+//         << updatedLeaf1.header.parentPageId
+//         << ")\n";
+
+//     std::cout
+//         << "Leaf 2 parent: "
+//         << (updatedLeaf2Parent
+//                 ? "PASS"
+//                 : "FAIL")
+//         << " ("
+//         << updatedLeaf2.header.parentPageId
+//         << ")\n";
+
+//     std::cout
+//         << "Leaf 3 parent: "
+//         << (updatedLeaf3Parent
+//                 ? "PASS"
+//                 : "FAIL")
+//         << " ("
+//         << updatedLeaf3.header.parentPageId
+//         << ")\n";
+
+//     std::cout
+//         << "Leaf 4 parent: "
+//         << (leaf4Parent
+//                 ? "PASS"
+//                 : "FAIL")
+//         << " ("
+//         << leaf4.header.parentPageId
+//         << ")\n";
+
+//     // ==========================================
+//     // Leaf sizes
+//     // ==========================================
+
+//     bool leaf1SizeCorrect =
+//         updatedLeaf1.header.size == 170;
+
+//     bool leaf2SizeCorrect =
+//         updatedLeaf2.header.size == 170;
+
+//     bool leaf3SizeCorrect =
+//         updatedLeaf3.header.size == 170;
+
+//     bool leaf4SizeCorrect =
+//         leaf4Read &&
+//         leaf4.header.size == 170;
+
+//     std::cout
+//         << "\n========== LEAF SIZES ==========\n";
+
+//     std::cout
+//         << "Leaf 1 size: "
+//         << (leaf1SizeCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "Leaf 2 size: "
+//         << (leaf2SizeCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "Leaf 3 size: "
+//         << (leaf3SizeCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "Leaf 4 size: "
+//         << (leaf4SizeCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     // ==========================================
+//     // Boundary validation
+//     // ==========================================
+
+//     bool boundary1 =
+//         updatedLeaf1.entries[updatedLeaf1.header.size - 1].key == 170 &&
+//         updatedLeaf2.entries[0].key == 171;
+
+//     bool boundary2 =
+//         updatedLeaf2.entries[updatedLeaf2.header.size - 1].key == 340 &&
+//         updatedLeaf3.entries[0].key == 341;
+
+//     bool boundary3 =
+//         updatedLeaf3.entries[updatedLeaf3.header.size - 1].key == 510 &&
+//         leaf4.entries[0].key == 511;
+
+//     bool boundary4 =
+//         leaf4.entries[leaf4.header.size - 1].key == 680;
+
+//     std::cout
+//         << "\n========== LEAF BOUNDARIES ==========\n";
+
+//     std::cout
+//         << "170 -> 171: "
+//         << (boundary1
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "340 -> 341: "
+//         << (boundary2
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "510 -> 511: "
+//         << (boundary3
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "680 final key: "
+//         << (boundary4
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     // ==========================================
+//     // Leaf chain
+//     // ==========================================
+
+//     bool chainCorrect =
+//         updatedLeaf1.nextPageId == leaf2PageId &&
+//         updatedLeaf2.nextPageId == leaf3PageId &&
+//         updatedLeaf3.nextPageId == leaf4PageId &&
+//         leaf4.nextPageId == -1;
+
+//     std::cout
+//         << "\nLeaf chain: "
+//         << (chainCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     // ==========================================
+//     // Search validation
+//     // ==========================================
+
+//     bool allKeysSearchable = true;
+
+//     for (int key = 1;
+//          key <= 680;
+//          key++)
+//     {
+//         RecordPointer result =
+//             tree.search(key);
+
+//         if (result.pageId != key ||
+//             result.slotId != key)
+//         {
+//             std::cout
+//                 << "Search failed for key: "
+//                 << key
+//                 << '\n';
+
+//             allKeysSearchable = false;
+//             break;
+//         }
+//     }
+
+//     std::cout
+//         << "All keys searchable: "
+//         << (allKeysSearchable
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     // ==========================================
+//     // Print final structure
+//     // ==========================================
+
+//     std::cout
+//         << "\n========== FINAL TREE STRUCTURE ==========\n\n";
+
+//     std::cout
+//         << "                    Root: "
+//         << newRootPageId
+//         << '\n';
+
+//     std::cout
+//         << "                 ["
+//         << newRoot.entries[0].key
+//         << " | "
+//         << newRoot.entries[1].key
+//         << " | "
+//         << newRoot.entries[2].key
+//         << "]\n";
+
+//     std::cout
+//         << "                /     |     |     \\\n";
+
+//     std::cout
+//         << "               /      |     |      \\\n";
+
+//     std::cout
+//         << "          Leaf: "
+//         << leaf1PageId
+//         << "  Leaf: "
+//         << leaf2PageId
+//         << "  Leaf: "
+//         << leaf3PageId
+//         << "  Leaf: "
+//         << leaf4PageId
+//         << '\n';
+
+//     std::cout
+//         << "         [1..170] [171..340] "
+//         << "[341..510] [511..680]\n";
+
+//     // ==========================================
+//     // Final result
+//     // ==========================================
+
+//     std::cout
+//         << "LEAF_MAX_ENTRIES = "
+//         << LEAF_MAX_ENTRIES
+//         << '\n';
+
+//     std::cout
+//         << "INTERNAL_MAX_ENTRIES = "
+//         << INTERNAL_MAX_ENTRIES
+//         << '\n';
+
+//     bool allPassed =
+//         insertSuccess &&
+//         rootRead &&
+//         rootParentCorrect &&
+//         leaf1ParentCorrect &&
+//         leaf2ParentCorrect &&
+//         leaf3ParentCorrect &&
+//         additionalInsertSuccess &&
+//         rootUnchanged &&
+//         newRootRead &&
+//         rootSizeCorrect &&
+//         separator1Correct &&
+//         separator2Correct &&
+//         separator3Correct &&
+//         rootParentStillCorrect &&
+//         leaf4Read &&
+//         updatedLeaf1Parent &&
+//         updatedLeaf2Parent &&
+//         updatedLeaf3Parent &&
+//         leaf4Parent &&
+//         leaf1SizeCorrect &&
+//         leaf2SizeCorrect &&
+//         leaf3SizeCorrect &&
+//         leaf4SizeCorrect &&
+//         boundary1 &&
+//         boundary2 &&
+//         boundary3 &&
+//         boundary4 &&
+//         chainCorrect &&
+//         allKeysSearchable;
+
+//     std::cout
+//         << "\n========================================\n";
+
+//     if (allPassed)
+//     {
+//         std::cout
+//             << "DAY 14: PARENT POINTER TEST PASS\n";
+//     }
+//     else
+//     {
+//         std::cout
+//             << "DAY 14: PARENT POINTER TEST FAIL\n";
+//     }
+
+//     std::cout
+//         << "========================================\n";
+
+//     // ==========================================
+//     // Flush
+//     // ==========================================
+
+//     bpm.FlushAllPages();
+
+//     std::cout
+//         << "\nDisk flush completed.\n";
+
+//     return allPassed ? 0 : 1;
+// }
 
 #include <iostream>
 #include <cstdio>
@@ -2849,24 +4235,30 @@
 int main()
 {
     const std::string filename =
-        "../data/day13_test.idx";
-
-    // ==========================================
-    // Remove old test file
-    // ==========================================
+        "../data/day15_test.idx";
 
     std::remove(filename.c_str());
 
     std::cout
         << "\n========================================\n"
-        << "DAY 13: MULTIPLE LEAF SPLITS TEST\n"
+        << "DAY 15: INTERNAL NODE SPLIT TEST\n"
         << "========================================\n\n";
+
+    std::cout
+        << "LEAF_MAX_ENTRIES = "
+        << LEAF_MAX_ENTRIES
+        << '\n';
+
+    std::cout
+        << "INTERNAL_MAX_ENTRIES = "
+        << INTERNAL_MAX_ENTRIES
+        << '\n';
 
     // ==========================================
     // Buffer Pool
     // ==========================================
 
-    BufferPoolManager bpm(10);
+    BufferPoolManager bpm(20);
 
     // ==========================================
     // B+ Tree
@@ -2888,24 +4280,41 @@ int main()
         << "Tree initialization: PASS\n";
 
     // ==========================================
-    // Insert 1 -> 510
+    // Number of leaves required to fill root
     //
-    // 170 entries per leaf
+    // Internal node with 509 entries can have
+    // 510 children.
     //
-    // Expected:
-    //
-    // Leaf 1 = 1..170
-    // Leaf 2 = 171..340
-    // Leaf 3 = 341..510
-    //
-    // Root:
-    //
-    //          [171 | 341]
-    //         /     |     \
-    //        L1     L2     L3
+    // We need one additional child to overflow.
     // ==========================================
 
-    const int totalKeys = 510;
+    const int requiredLeaves =
+        INTERNAL_MAX_ENTRIES + 1;
+
+    const int keysBeforeRootOverflow =
+        requiredLeaves * LEAF_MAX_ENTRIES;
+
+    const int totalKeys =
+        keysBeforeRootOverflow + 1;
+
+    std::cout
+        << "\nRequired leaves: "
+        << requiredLeaves
+        << '\n';
+
+    std::cout
+        << "Keys before root overflow: "
+        << keysBeforeRootOverflow
+        << '\n';
+
+    std::cout
+        << "Total test keys: "
+        << totalKeys
+        << '\n';
+
+    // ==========================================
+    // Insert all keys
+    // ==========================================
 
     bool insertSuccess = true;
 
@@ -2923,19 +4332,26 @@ int main()
                 pointer))
         {
             std::cout
-                << "Insert failed for key: "
+                << "\nInsert failed at key: "
                 << key
                 << '\n';
 
             insertSuccess = false;
             break;
         }
+
+        // Progress output
+        if (key % 10000 == 0)
+        {
+            std::cout
+                << "Inserted "
+                << key
+                << " keys...\n";
+        }
     }
 
     std::cout
-        << "\nInserted "
-        << totalKeys
-        << " keys: "
+        << "\nLarge insertion: "
         << (insertSuccess
                 ? "PASS"
                 : "FAIL")
@@ -2943,11 +4359,12 @@ int main()
 
     if (!insertSuccess)
     {
+        bpm.FlushAllPages();
         return 1;
     }
 
     // ==========================================
-    // Root
+    // Read root
     // ==========================================
 
     int rootPageId =
@@ -2957,10 +4374,6 @@ int main()
         << "\nRoot Page ID: "
         << rootPageId
         << '\n';
-
-    // ==========================================
-    // Read root
-    // ==========================================
 
     InternalPage root{};
 
@@ -2982,24 +4395,42 @@ int main()
     }
 
     // ==========================================
-    // Print root
+    // Root should now be a NEW root.
+    //
+    // Its children should be internal pages.
     // ==========================================
 
-    std::cout
-        << "\n========== ROOT INFORMATION ==========\n";
+    bool rootIsInternal =
+        root.header.type ==
+        BPlusPageType::INTERNAL;
+
+    bool rootParentCorrect =
+        root.header.parentPageId == -1;
 
     std::cout
-        << "Root Page ID: "
-        << rootPageId
+        << "\n========== ROOT VALIDATION ==========\n";
+
+    std::cout
+        << "Root is INTERNAL: "
+        << (rootIsInternal
+                ? "PASS"
+                : "FAIL")
         << '\n';
 
     std::cout
-        << "Root Size: "
+        << "Root parent = -1: "
+        << (rootParentCorrect
+                ? "PASS"
+                : "FAIL")
+        << '\n';
+
+    std::cout
+        << "Root size: "
         << root.header.size
         << '\n';
 
     std::cout
-        << "First Child Page ID: "
+        << "Root first child: "
         << root.firstChildPageId
         << '\n';
 
@@ -3008,395 +4439,260 @@ int main()
          i++)
     {
         std::cout
-            << "Entry "
+            << "Root entry "
             << i
-            << ": Key = "
+            << ": key="
             << root.entries[i].key
-            << ", Child = "
+            << ", child="
             << root.entries[i].childPageId
             << '\n';
     }
 
     // ==========================================
-    // Root validation
+    // Root should have exactly 2 children
+    // after splitting.
+    //
+    // Therefore:
+    //
+    // root.header.size == 1
+    //
+    // firstChild -> left internal
+    // entries[0] -> right internal
     // ==========================================
 
     bool rootSizeCorrect =
-        root.header.size == 2;
+        root.header.size == 1;
 
-    bool firstSeparatorCorrect =
-        root.header.size >= 2 &&
-        root.entries[0].key == 171;
-
-    bool secondSeparatorCorrect =
-        root.header.size >= 2 &&
-        root.entries[1].key == 341;
-
-    bool firstChildValid =
-        root.firstChildPageId != -1;
-
-    bool secondChildValid =
-        root.header.size >= 1 &&
+    bool rootChildrenCorrect =
+        root.firstChildPageId != -1 &&
         root.entries[0].childPageId != -1;
 
-    bool thirdChildValid =
-        root.header.size >= 2 &&
-        root.entries[1].childPageId != -1;
-
     std::cout
-        << "\nRoot size: "
+        << "\nRoot size = 1: "
         << (rootSizeCorrect
                 ? "PASS"
                 : "FAIL")
         << '\n';
 
     std::cout
-        << "First separator (171): "
-        << (firstSeparatorCorrect
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    std::cout
-        << "Second separator (341): "
-        << (secondSeparatorCorrect
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    std::cout
-        << "First child pointer: "
-        << (firstChildValid
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    std::cout
-        << "Second child pointer: "
-        << (secondChildValid
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    std::cout
-        << "Third child pointer: "
-        << (thirdChildValid
+        << "Root has two children: "
+        << (rootChildrenCorrect
                 ? "PASS"
                 : "FAIL")
         << '\n';
 
     // ==========================================
-    // Read all three leaves
+    // Read left internal node
     // ==========================================
 
-    int leaf1PageId =
+    int leftInternalPageId =
         root.firstChildPageId;
 
-    int leaf2PageId =
+    int rightInternalPageId =
         root.entries[0].childPageId;
 
-    int leaf3PageId =
-        root.entries[1].childPageId;
+    InternalPage leftInternal{};
+    InternalPage rightInternal{};
 
-    LeafPage leaf1{};
-    LeafPage leaf2{};
-    LeafPage leaf3{};
+    bool leftRead =
+        tree.readInternalPage(
+            leftInternalPageId,
+            leftInternal);
 
-    bool leaf1Read =
-        tree.readLeafPage(
-            leaf1PageId,
-            leaf1);
-
-    bool leaf2Read =
-        tree.readLeafPage(
-            leaf2PageId,
-            leaf2);
-
-    bool leaf3Read =
-        tree.readLeafPage(
-            leaf3PageId,
-            leaf3);
+    bool rightRead =
+        tree.readInternalPage(
+            rightInternalPageId,
+            rightInternal);
 
     std::cout
-        << "\n========== LEAF READ ==========\n";
-
-    std::cout
-        << "Leaf 1 read: "
-        << (leaf1Read
+        << "\nLeft internal read: "
+        << (leftRead
                 ? "PASS"
                 : "FAIL")
         << '\n';
 
     std::cout
-        << "Leaf 2 read: "
-        << (leaf2Read
+        << "Right internal read: "
+        << (rightRead
                 ? "PASS"
                 : "FAIL")
         << '\n';
 
-    std::cout
-        << "Leaf 3 read: "
-        << (leaf3Read
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    // ==========================================
-    // Leaf sizes
-    // ==========================================
-
-    bool leaf1SizeCorrect =
-        leaf1Read &&
-        leaf1.header.size == 170;
-
-    bool leaf2SizeCorrect =
-        leaf2Read &&
-        leaf2.header.size == 170;
-
-    bool leaf3SizeCorrect =
-        leaf3Read &&
-        leaf3.header.size == 170;
-
-    std::cout
-        << "\n========== LEAF SIZES ==========\n";
-
-    std::cout
-        << "Leaf 1 size: "
-        << (leaf1SizeCorrect
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    std::cout
-        << "Leaf 2 size: "
-        << (leaf2SizeCorrect
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    std::cout
-        << "Leaf 3 size: "
-        << (leaf3SizeCorrect
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    // ==========================================
-    // Leaf boundaries
-    // ==========================================
-
-    bool boundary1Correct =
-        leaf1Read &&
-        leaf2Read &&
-        leaf1.entries[
-            leaf1.header.size - 1
-        ].key == 170 &&
-        leaf2.entries[0].key == 171;
-
-    bool boundary2Correct =
-        leaf2Read &&
-        leaf3Read &&
-        leaf2.entries[
-            leaf2.header.size - 1
-        ].key == 340 &&
-        leaf3.entries[0].key == 341;
-
-    std::cout
-        << "\n========== LEAF BOUNDARIES ==========\n";
-
-    std::cout
-        << "170 -> 171 boundary: "
-        << (boundary1Correct
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    std::cout
-        << "340 -> 341 boundary: "
-        << (boundary2Correct
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    // ==========================================
-    // Leaf chain
-    // ==========================================
-
-    bool chainCorrect =
-        leaf1Read &&
-        leaf2Read &&
-        leaf3Read &&
-        leaf1.nextPageId == leaf2PageId &&
-        leaf2.nextPageId == leaf3PageId &&
-        leaf3.nextPageId == -1;
-
-    std::cout
-        << "\nLeaf chain: "
-        << (chainCorrect
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    // ==========================================
-    // Check sorted ordering inside leaves
-    // ==========================================
-
-    bool orderingCorrect = true;
-
-    for (int i = 1;
-         i < leaf1.header.size;
-         i++)
+    if (!leftRead ||
+        !rightRead)
     {
-        if (leaf1.entries[i - 1].key >=
-            leaf1.entries[i].key)
-        {
-            orderingCorrect = false;
-            break;
-        }
+        return 1;
     }
 
-    for (int i = 1;
-         i < leaf2.header.size;
-         i++)
-    {
-        if (leaf2.entries[i - 1].key >=
-            leaf2.entries[i].key)
-        {
-            orderingCorrect = false;
-            break;
-        }
-    }
+    // ==========================================
+    // Parent pointers
+    // ==========================================
 
-    for (int i = 1;
-         i < leaf3.header.size;
-         i++)
+    bool leftParentCorrect =
+        leftInternal.header.parentPageId ==
+        rootPageId;
+
+    bool rightParentCorrect =
+        rightInternal.header.parentPageId ==
+        rootPageId;
+
+    std::cout
+        << "\n========== INTERNAL PARENT POINTERS ==========\n";
+
+    std::cout
+        << "Left internal parent: "
+        << (leftParentCorrect
+                ? "PASS"
+                : "FAIL")
+        << " ("
+        << leftInternal.header.parentPageId
+        << ")\n";
+
+    std::cout
+        << "Right internal parent: "
+        << (rightParentCorrect
+                ? "PASS"
+                : "FAIL")
+        << " ("
+        << rightInternal.header.parentPageId
+        << ")\n";
+
+    // ==========================================
+    // Internal sizes
+    // ==========================================
+
+    std::cout
+        << "\n========== INTERNAL SIZES ==========\n";
+
+    std::cout
+        << "Left internal size: "
+        << leftInternal.header.size
+        << '\n';
+
+    std::cout
+        << "Right internal size: "
+        << rightInternal.header.size
+        << '\n';
+
+    bool leftNotFull =
+        leftInternal.header.size <
+        INTERNAL_MAX_ENTRIES;
+
+    bool rightNotFull =
+        rightInternal.header.size <
+        INTERNAL_MAX_ENTRIES;
+
+    std::cout
+        << "Left internal valid size: "
+        << (leftNotFull
+                ? "PASS"
+                : "FAIL")
+        << '\n';
+
+    std::cout
+        << "Right internal valid size: "
+        << (rightNotFull
+                ? "PASS"
+                : "FAIL")
+        << '\n';
+
+    // ==========================================
+    // Separator validation
+    // ==========================================
+
+    int rootSeparator =
+        root.entries[0].key;
+
+    std::cout
+        << "\nRoot separator: "
+        << rootSeparator
+        << '\n';
+
+    bool separatorValid =
+        rootSeparator > 0;
+
+    if (leftInternal.header.size > 0 &&
+        rightInternal.header.size > 0)
     {
-        if (leaf3.entries[i - 1].key >=
-            leaf3.entries[i].key)
-        {
-            orderingCorrect = false;
-            break;
-        }
+        int leftLastKey =
+            leftInternal.entries[
+                leftInternal.header.size - 1
+            ].key;
+
+        int rightFirstKey =
+            rightInternal.entries[0].key;
+
+        separatorValid =
+            separatorValid &&
+            leftLastKey < rootSeparator &&
+            rightFirstKey >= rootSeparator;
+
+        std::cout
+            << "Left last separator: "
+            << leftLastKey
+            << '\n';
+
+        std::cout
+            << "Right first separator: "
+            << rightFirstKey
+            << '\n';
     }
 
     std::cout
-        << "Leaf ordering: "
-        << (orderingCorrect
+        << "Separator ordering: "
+        << (separatorValid
                 ? "PASS"
                 : "FAIL")
         << '\n';
 
     // ==========================================
-    // Check ALL keys
-    // ==========================================
-
-    bool allKeysPresent = true;
-
-    for (int key = 1;
-         key <= totalKeys;
-         key++)
-    {
-        RecordPointer result =
-            tree.search(key);
-
-        if (result.pageId != key ||
-            result.slotId != key)
-        {
-            std::cout
-                << "Search failed for key: "
-                << key
-                << '\n';
-
-            allKeysPresent = false;
-            break;
-        }
-    }
-
-    std::cout
-        << "\nAll keys searchable: "
-        << (allKeysPresent
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    // ==========================================
-    // Boundary searches
+    // Search validation
+    //
+    // Test important boundary keys instead
+    // of reading all 172k results.
     // ==========================================
 
     int testKeys[] =
     {
         1,
-        170,
-        171,
-        200,
+        339,
         340,
-        341,
-        400,
-        510
+        1000,
+        50000,
+        100000,
+        150000,
+        keysBeforeRootOverflow,
+        totalKeys
     };
 
-    bool boundarySearchCorrect = true;
+    bool searchCorrect = true;
+
+    std::cout
+        << "\n========== SEARCH VALIDATION ==========\n";
 
     for (int key : testKeys)
     {
         RecordPointer result =
             tree.search(key);
 
-        if (result.pageId != key ||
-            result.slotId != key)
-        {
-            boundarySearchCorrect = false;
+        bool correct =
+            result.pageId == key &&
+            result.slotId == key;
 
-            std::cout
-                << "Boundary search failed: "
-                << key
-                << '\n';
+        std::cout
+            << "Search "
+            << key
+            << ": "
+            << (correct
+                    ? "PASS"
+                    : "FAIL")
+            << '\n';
+
+        if (!correct)
+        {
+            searchCorrect = false;
         }
     }
-
-    std::cout
-        << "Boundary searches: "
-        << (boundarySearchCorrect
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    // ==========================================
-    // Print final tree
-    // ==========================================
-
-    std::cout
-        << "\n========== TREE STRUCTURE ==========\n\n";
-
-    std::cout
-        << "                    Root: "
-        << rootPageId
-        << '\n';
-
-    std::cout
-        << "                 ["
-        << root.entries[0].key
-        << " | "
-        << root.entries[1].key
-        << "]\n";
-
-    std::cout
-        << "                /     |     \\\n";
-
-    std::cout
-        << "               /      |      \\\n";
-
-    std::cout
-        << "          Leaf: "
-        << leaf1PageId
-        << "  Leaf: "
-        << leaf2PageId
-        << "  Leaf: "
-        << leaf3PageId
-        << '\n';
-
-    std::cout
-        << "         [1..170] [171..340] [341..510]\n";
 
     // ==========================================
     // Final result
@@ -3405,24 +4701,18 @@ int main()
     bool allPassed =
         insertSuccess &&
         rootRead &&
+        rootIsInternal &&
+        rootParentCorrect &&
         rootSizeCorrect &&
-        firstSeparatorCorrect &&
-        secondSeparatorCorrect &&
-        firstChildValid &&
-        secondChildValid &&
-        thirdChildValid &&
-        leaf1Read &&
-        leaf2Read &&
-        leaf3Read &&
-        leaf1SizeCorrect &&
-        leaf2SizeCorrect &&
-        leaf3SizeCorrect &&
-        boundary1Correct &&
-        boundary2Correct &&
-        chainCorrect &&
-        orderingCorrect &&
-        allKeysPresent &&
-        boundarySearchCorrect;
+        rootChildrenCorrect &&
+        leftRead &&
+        rightRead &&
+        leftParentCorrect &&
+        rightParentCorrect &&
+        leftNotFull &&
+        rightNotFull &&
+        separatorValid &&
+        searchCorrect;
 
     std::cout
         << "\n========================================\n";
@@ -3430,19 +4720,19 @@ int main()
     if (allPassed)
     {
         std::cout
-            << "DAY 13: MULTIPLE LEAF SPLITS PASS\n";
+            << "DAY 15: INTERNAL NODE SPLIT PASS\n";
     }
     else
     {
         std::cout
-            << "DAY 13: MULTIPLE LEAF SPLITS FAIL\n";
+            << "DAY 15: INTERNAL NODE SPLIT FAIL\n";
     }
 
     std::cout
         << "========================================\n";
 
     // ==========================================
-    // Disk flush
+    // Flush
     // ==========================================
 
     bpm.FlushAllPages();
