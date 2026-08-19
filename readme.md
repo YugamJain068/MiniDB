@@ -312,19 +312,16 @@ MiniDB > SELECT * FROM users;
 * Memory management
 * Disk I/O
 * Database architecture
-
----
-
-# Upcoming Phases
-
-## Phase 5
-
 * B+ Tree Index
 * Index creation
 * Index search
 * Node split
 * Leaf nodes
 * Internal nodes
+
+---
+
+# Upcoming Phases
 
 ## Phase 6
 
