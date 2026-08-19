@@ -4223,49 +4223,864 @@
 //     return allPassed ? 0 : 1;
 // }
 
-#include <iostream>
-#include <cstdio>
+// #include <iostream>
+// #include <cstdio>
 
-#include "buffer/buffer_pool_manager.h"
+// #include "buffer/buffer_pool_manager.h"
+// #include "bptree/b_plus_tree.h"
+// #include "bptree/b_plus_tree_internal_page.h"
+// #include "bptree/b_plus_tree_leaf_page.h"
+// #include "storage/record_pointer.h"
+
+// int main()
+// {
+//     const std::string filename =
+//         "../data/day15_test.idx";
+
+//     std::remove(filename.c_str());
+
+//     std::cout
+//         << "\n========================================\n"
+//         << "DAY 15: INTERNAL NODE SPLIT TEST\n"
+//         << "========================================\n\n";
+
+//     std::cout
+//         << "LEAF_MAX_ENTRIES = "
+//         << LEAF_MAX_ENTRIES
+//         << '\n';
+
+//     std::cout
+//         << "INTERNAL_MAX_ENTRIES = "
+//         << INTERNAL_MAX_ENTRIES
+//         << '\n';
+
+//     // ==========================================
+//     // Buffer Pool
+//     // ==========================================
+
+//     BufferPoolManager bpm(20);
+
+//     // ==========================================
+//     // B+ Tree
+//     // ==========================================
+
+//     BPlusTree tree(
+//         &bpm,
+//         filename);
+
+//     if (!tree.initialize())
+//     {
+//         std::cout
+//             << "Tree initialization: FAIL\n";
+
+//         return 1;
+//     }
+
+//     std::cout
+//         << "Tree initialization: PASS\n";
+
+//     // ==========================================
+//     // Number of leaves required to fill root
+//     //
+//     // Internal node with 509 entries can have
+//     // 510 children.
+//     //
+//     // We need one additional child to overflow.
+//     // ==========================================
+
+//     const int requiredLeaves =
+//         INTERNAL_MAX_ENTRIES + 1;
+
+//     const int keysBeforeRootOverflow =
+//         requiredLeaves * LEAF_MAX_ENTRIES;
+
+//     const int totalKeys =
+//         keysBeforeRootOverflow + 1;
+
+//     std::cout
+//         << "\nRequired leaves: "
+//         << requiredLeaves
+//         << '\n';
+
+//     std::cout
+//         << "Keys before root overflow: "
+//         << keysBeforeRootOverflow
+//         << '\n';
+
+//     std::cout
+//         << "Total test keys: "
+//         << totalKeys
+//         << '\n';
+
+//     // ==========================================
+//     // Insert all keys
+//     // ==========================================
+
+//     bool insertSuccess = true;
+
+//     for (int key = 1;
+//          key <= totalKeys;
+//          key++)
+//     {
+//         RecordPointer pointer;
+
+//         pointer.pageId = key;
+//         pointer.slotId = key;
+
+//         if (!tree.insert(
+//                 key,
+//                 pointer))
+//         {
+//             std::cout
+//                 << "\nInsert failed at key: "
+//                 << key
+//                 << '\n';
+
+//             insertSuccess = false;
+//             break;
+//         }
+
+//         // Progress output
+//         if (key % 10000 == 0)
+//         {
+//             std::cout
+//                 << "Inserted "
+//                 << key
+//                 << " keys...\n";
+//         }
+//     }
+
+//     std::cout
+//         << "\nLarge insertion: "
+//         << (insertSuccess
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     if (!insertSuccess)
+//     {
+//         bpm.FlushAllPages();
+//         return 1;
+//     }
+
+//     // ==========================================
+//     // Read root
+//     // ==========================================
+
+//     int rootPageId =
+//         tree.getRootPageId();
+
+//     std::cout
+//         << "\nRoot Page ID: "
+//         << rootPageId
+//         << '\n';
+
+//     InternalPage root{};
+
+//     bool rootRead =
+//         tree.readInternalPage(
+//             rootPageId,
+//             root);
+
+//     std::cout
+//         << "Root read: "
+//         << (rootRead
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     if (!rootRead)
+//     {
+//         return 1;
+//     }
+
+//     // ==========================================
+//     // Root should now be a NEW root.
+//     //
+//     // Its children should be internal pages.
+//     // ==========================================
+
+//     bool rootIsInternal =
+//         root.header.type ==
+//         BPlusPageType::INTERNAL;
+
+//     bool rootParentCorrect =
+//         root.header.parentPageId == -1;
+
+//     std::cout
+//         << "\n========== ROOT VALIDATION ==========\n";
+
+//     std::cout
+//         << "Root is INTERNAL: "
+//         << (rootIsInternal
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "Root parent = -1: "
+//         << (rootParentCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "Root size: "
+//         << root.header.size
+//         << '\n';
+
+//     std::cout
+//         << "Root first child: "
+//         << root.firstChildPageId
+//         << '\n';
+
+//     for (int i = 0;
+//          i < root.header.size;
+//          i++)
+//     {
+//         std::cout
+//             << "Root entry "
+//             << i
+//             << ": key="
+//             << root.entries[i].key
+//             << ", child="
+//             << root.entries[i].childPageId
+//             << '\n';
+//     }
+
+//     // ==========================================
+//     // Root should have exactly 2 children
+//     // after splitting.
+//     //
+//     // Therefore:
+//     //
+//     // root.header.size == 1
+//     //
+//     // firstChild -> left internal
+//     // entries[0] -> right internal
+//     // ==========================================
+
+//     bool rootSizeCorrect =
+//         root.header.size == 2;
+
+//     bool rootHasThreeChildren =
+//     root.firstChildPageId != -1 &&
+//     root.entries[0].childPageId != -1 &&
+//     root.entries[1].childPageId != -1;
+
+//     std::cout
+//         << "\nRoot size = 2: "
+//         << (rootSizeCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "Root has two children: "
+//         << (rootHasThreeChildren
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     // ==========================================
+//     // Read left internal node
+//     // ==========================================
+
+//     int leftInternalPageId =
+//         root.firstChildPageId;
+
+//     int rightInternalPageId =
+//         root.entries[0].childPageId;
+
+//     InternalPage leftInternal{};
+//     InternalPage rightInternal{};
+
+//     bool leftRead =
+//         tree.readInternalPage(
+//             leftInternalPageId,
+//             leftInternal);
+
+//     bool rightRead =
+//         tree.readInternalPage(
+//             rightInternalPageId,
+//             rightInternal);
+
+//     std::cout
+//         << "\nLeft internal read: "
+//         << (leftRead
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "Right internal read: "
+//         << (rightRead
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     if (!leftRead ||
+//         !rightRead)
+//     {
+//         return 1;
+//     }
+
+//     // ==========================================
+//     // Parent pointers
+//     // ==========================================
+
+//     bool leftParentCorrect =
+//         leftInternal.header.parentPageId ==
+//         rootPageId;
+
+//     bool rightParentCorrect =
+//         rightInternal.header.parentPageId ==
+//         rootPageId;
+
+//     std::cout
+//         << "\n========== INTERNAL PARENT POINTERS ==========\n";
+
+//     std::cout
+//         << "Left internal parent: "
+//         << (leftParentCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << " ("
+//         << leftInternal.header.parentPageId
+//         << ")\n";
+
+//     std::cout
+//         << "Right internal parent: "
+//         << (rightParentCorrect
+//                 ? "PASS"
+//                 : "FAIL")
+//         << " ("
+//         << rightInternal.header.parentPageId
+//         << ")\n";
+
+//     // ==========================================
+//     // Internal sizes
+//     // ==========================================
+
+//     std::cout
+//         << "\n========== INTERNAL SIZES ==========\n";
+
+//     std::cout
+//         << "Left internal size: "
+//         << leftInternal.header.size
+//         << '\n';
+
+//     std::cout
+//         << "Right internal size: "
+//         << rightInternal.header.size
+//         << '\n';
+
+//     bool leftNotFull =
+//         leftInternal.header.size <
+//         INTERNAL_MAX_ENTRIES;
+
+//     bool rightNotFull =
+//         rightInternal.header.size <
+//         INTERNAL_MAX_ENTRIES;
+
+//     std::cout
+//         << "Left internal valid size: "
+//         << (leftNotFull
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "Right internal valid size: "
+//         << (rightNotFull
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     // ==========================================
+//     // Separator validation
+//     // ==========================================
+
+//     int rootSeparator =
+//         root.entries[0].key;
+
+//     std::cout
+//         << "\nRoot separator: "
+//         << rootSeparator
+//         << '\n';
+
+//     bool separatorValid =
+//         rootSeparator > 0;
+
+//     if (leftInternal.header.size > 0 &&
+//         rightInternal.header.size > 0)
+//     {
+//         int leftLastKey =
+//             leftInternal.entries[
+//                 leftInternal.header.size - 1
+//             ].key;
+
+//         int rightFirstKey =
+//             rightInternal.entries[0].key;
+
+//         separatorValid =
+//             separatorValid &&
+//             leftLastKey < rootSeparator &&
+//             rightFirstKey >= rootSeparator;
+
+//         std::cout
+//             << "Left last separator: "
+//             << leftLastKey
+//             << '\n';
+
+//         std::cout
+//             << "Right first separator: "
+//             << rightFirstKey
+//             << '\n';
+//     }
+
+//     std::cout
+//         << "Separator ordering: "
+//         << (separatorValid
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     // ==========================================
+//     // Search validation
+//     //
+//     // Test important boundary keys instead
+//     // of reading all 172k results.
+//     // ==========================================
+
+//     int testKeys[] =
+//     {
+//         1,
+//         339,
+//         340,
+//         1000,
+//         50000,
+//         100000,
+//         150000,
+//         keysBeforeRootOverflow,
+//         totalKeys
+//     };
+
+//     bool searchCorrect = true;
+
+//     std::cout
+//         << "\n========== SEARCH VALIDATION ==========\n";
+
+//     for (int key : testKeys)
+//     {
+//         RecordPointer result =
+//             tree.search(key);
+
+//         bool correct =
+//             result.pageId == key &&
+//             result.slotId == key;
+
+//         std::cout
+//             << "Search "
+//             << key
+//             << ": "
+//             << (correct
+//                     ? "PASS"
+//                     : "FAIL")
+//             << '\n';
+
+//         if (!correct)
+//         {
+//             searchCorrect = false;
+//         }
+//     }
+
+//     // ==========================================
+//     // Final result
+//     // ==========================================
+
+//     bool allPassed =
+//         insertSuccess &&
+//         rootRead &&
+//         rootIsInternal &&
+//         rootParentCorrect &&
+//         rootSizeCorrect &&
+//         rootHasThreeChildren &&
+//         leftRead &&
+//         rightRead &&
+//         leftParentCorrect &&
+//         rightParentCorrect &&
+//         leftNotFull &&
+//         rightNotFull &&
+//         separatorValid &&
+//         searchCorrect;
+
+//     std::cout
+//         << "\n========================================\n";
+
+//     if (allPassed)
+//     {
+//         std::cout
+//             << "DAY 15: INTERNAL NODE SPLIT PASS\n";
+//     }
+//     else
+//     {
+//         std::cout
+//             << "DAY 15: INTERNAL NODE SPLIT FAIL\n";
+//     }
+
+//     std::cout
+//         << "========================================\n";
+
+//     // ==========================================
+//     // Flush
+//     // ==========================================
+
+//     bpm.FlushAllPages();
+
+//     std::cout
+//         << "\nDisk flush completed.\n";
+
+
+//     return allPassed ? 0 : 1;
+// }
+
+
+// #include <iostream>
+// #include <cstdio>
+// #include <vector>
+
+// #include "bptree/b_plus_tree.h"
+// #include "bptree/b_plus_tree_page_manager.h"
+// #include "buffer/buffer_pool_manager.h"
+
+// int main()
+// {
+//     const std::string filename =
+//         "../data/day16_test.idx";
+
+//     // std::remove(filename.c_str());
+
+//     // =========================================================
+//     // PHASE 1: BUILD TREE
+//     // =========================================================
+
+//     std::cout
+//         << "\n========== PHASE 1: BUILD TREE ==========\n";
+
+//     int expectedRootPageId = -1;
+
+//     {
+//         BufferPoolManager bufferPool(20);
+
+//         BPlusTree tree(
+//             &bufferPool,
+//             filename);
+
+//         if (!tree.initialize())
+//         {
+//             std::cout
+//                 << "Tree initialization: FAIL\n";
+
+//             return 1;
+//         }
+
+//         // Insert enough keys to create
+//         // multiple internal pages.
+//         for (int key = 1;
+//              key <= 100000;
+//              key++)
+//         {
+//             RecordPointer pointer{
+//                 1,
+//                 key};
+
+//             if (!tree.insert(
+//                     key,
+//                     pointer))
+//             {
+//                 std::cout
+//                     << "Insert failed at key: "
+//                     << key
+//                     << '\n';
+
+//                 return 1;
+//             }
+//         }
+
+//         BPlusTreeMetadata metadata{};
+
+//         BPlusTreePageManager manager(
+//             bufferPool,
+//             filename);
+
+//         if (!manager.readMetadata(metadata))
+//         {
+//             std::cout
+//                 << "Metadata read: FAIL\n";
+
+//             return 1;
+//         }
+
+//         expectedRootPageId =
+//             metadata.rootPageId;
+
+//         std::cout
+//             << "Root before restart: "
+//             << expectedRootPageId
+//             << '\n';
+
+//         std::cout
+//             << "Tree construction: PASS\n";
+
+//         bufferPool.FlushAllPages();
+
+//         std::cout
+//             << "Disk flush: PASS\n";
+//     }
+
+//     // =========================================================
+//     // PHASE 2: REOPEN TREE
+//     // =========================================================
+
+//     std::cout
+//         << "\n========== PHASE 2: REOPEN TREE ==========\n";
+
+//     {
+//         BufferPoolManager bufferPool(20);
+
+//         BPlusTreePageManager manager(
+//             bufferPool,
+//             filename);
+
+//         if (!manager.initializeIndex())
+//         {
+//             std::cout
+//                 << "Index initialization: FAIL\n";
+
+//             return 1;
+//         }
+
+//         BPlusTreeMetadata metadata{};
+
+//         if (!manager.readMetadata(metadata))
+//         {
+//             std::cout
+//                 << "Metadata recovery: FAIL\n";
+
+//             return 1;
+//         }
+
+//         std::cout
+//             << "Recovered Root: "
+//             << metadata.rootPageId
+//             << '\n';
+
+//         bool rootRecovered =
+//             metadata.rootPageId ==
+//             expectedRootPageId;
+
+//         std::cout
+//             << "Root recovery: "
+//             << (rootRecovered
+//                     ? "PASS"
+//                     : "FAIL")
+//             << '\n';
+
+//         if (!rootRecovered)
+//             return 1;
+
+//         // =====================================================
+//         // READ ROOT
+//         // =====================================================
+
+//         InternalPage root{};
+
+//         bool rootRead =
+//             manager.readInternalPage(
+//                 metadata.rootPageId,
+//                 root);
+
+//         std::cout
+//             << "Root read: "
+//             << (rootRead
+//                     ? "PASS"
+//                     : "FAIL")
+//             << '\n';
+
+//         if (!rootRead)
+//             return 1;
+
+//         std::cout
+//             << "\n========== RECOVERED ROOT ==========\n";
+
+//         std::cout
+//             << "Root Page ID: "
+//             << root.header.pageId
+//             << '\n';
+
+//         std::cout
+//             << "Root Parent: "
+//             << root.header.parentPageId
+//             << '\n';
+
+//         std::cout
+//             << "Root Size: "
+//             << root.header.size
+//             << '\n';
+
+//         std::cout
+//             << "First Child: "
+//             << root.firstChildPageId
+//             << '\n';
+
+//         for (int i = 0;
+//              i < root.header.size;
+//              i++)
+//         {
+//             std::cout
+//                 << "Entry "
+//                 << i
+//                 << ": key="
+//                 << root.entries[i].key
+//                 << " child="
+//                 << root.entries[i].childPageId
+//                 << '\n';
+//         }
+
+//         // =====================================================
+//         // BASIC ROOT VALIDATION
+//         // =====================================================
+
+//         bool rootIsValid =
+//             root.header.type ==
+//                 BPlusPageType::INTERNAL &&
+//             root.header.parentPageId == -1 &&
+//             root.firstChildPageId != -1 &&
+//             root.header.size > 0;
+
+//         std::cout
+//             << "\nRoot structure: "
+//             << (rootIsValid
+//                     ? "PASS"
+//                     : "FAIL")
+//             << '\n';
+
+//         // =====================================================
+//         // VERIFY CHILD PAGES EXIST
+//         // =====================================================
+
+//         bool childrenValid = true;
+
+//         for (int i = -1;
+//              i < root.header.size;
+//              i++)
+//         {
+//             int childPageId;
+
+//             if (i == -1)
+//             {
+//                 childPageId =
+//                     root.firstChildPageId;
+//             }
+//             else
+//             {
+//                 childPageId =
+//                     root.entries[i].childPageId;
+//             }
+
+//             BPlusTreePageHeader header{};
+
+//             Page* page =
+//                 bufferPool.FetchPage(
+//                     filename,
+//                     childPageId);
+
+//             if (page == nullptr)
+//             {
+//                 childrenValid = false;
+//                 break;
+//             }
+
+//             deserializePageHeader(
+//                 *page,
+//                 header);
+
+//             bufferPool.UnpinPage(
+//                 filename,
+//                 childPageId);
+
+//             if (header.pageId !=
+//                 childPageId)
+//             {
+//                 childrenValid = false;
+//                 break;
+//             }
+//         }
+
+//         std::cout
+//             << "Root children recovered: "
+//             << (childrenValid
+//                     ? "PASS"
+//                     : "FAIL")
+//             << '\n';
+
+//         // =====================================================
+//         // FINAL RESULT
+//         // =====================================================
+
+//         bool passed =
+//             rootRecovered &&
+//             rootRead &&
+//             rootIsValid &&
+//             childrenValid;
+
+//         std::cout
+//             << "\n========================================\n";
+
+//         std::cout
+//             << "DAY 16: PERSISTENCE TEST "
+//             << (passed
+//                     ? "PASS"
+//                     : "FAIL")
+//             << '\n';
+
+//         std::cout
+//             << "========================================\n";
+
+//         bufferPool.FlushAllPages();
+
+//         if (!passed)
+//             return 1;
+//     }
+
+//     return 0;
+// }
+
+
+#include <iostream>
+
 #include "bptree/b_plus_tree.h"
-#include "bptree/b_plus_tree_internal_page.h"
-#include "bptree/b_plus_tree_leaf_page.h"
-#include "storage/record_pointer.h"
+#include "bptree/b_plus_tree_page_manager.h"
+#include "buffer/buffer_pool_manager.h"
 
 int main()
 {
     const std::string filename =
-        "../data/day15_test.idx";
+        "../data/day16_test.idx";
 
-    std::remove(filename.c_str());
+    // IMPORTANT:
+    // Do NOT delete the file.
+    // Day 17 tests persistence across program executions.
 
-    std::cout
-        << "\n========================================\n"
-        << "DAY 15: INTERNAL NODE SPLIT TEST\n"
-        << "========================================\n\n";
+    // =========================================================
+    // OPEN EXISTING INDEX
+    // =========================================================
 
-    std::cout
-        << "LEAF_MAX_ENTRIES = "
-        << LEAF_MAX_ENTRIES
-        << '\n';
-
-    std::cout
-        << "INTERNAL_MAX_ENTRIES = "
-        << INTERNAL_MAX_ENTRIES
-        << '\n';
-
-    // ==========================================
-    // Buffer Pool
-    // ==========================================
-
-    BufferPoolManager bpm(20);
-
-    // ==========================================
-    // B+ Tree
-    // ==========================================
+    BufferPoolManager bufferPool(20);
 
     BPlusTree tree(
-        &bpm,
+        &bufferPool,
         filename);
 
     if (!tree.initialize())
@@ -4277,395 +5092,60 @@ int main()
     }
 
     std::cout
-        << "Tree initialization: PASS\n";
+        << "\n========== DAY 17: PERSISTENT SEARCH ==========\n";
 
-    // ==========================================
-    // Number of leaves required to fill root
-    //
-    // Internal node with 509 entries can have
-    // 510 children.
-    //
-    // We need one additional child to overflow.
-    // ==========================================
+    // =========================================================
+    // READ METADATA
+    // =========================================================
 
-    const int requiredLeaves =
-        INTERNAL_MAX_ENTRIES + 1;
+    BPlusTreePageManager manager(
+        bufferPool,
+        filename);
 
-    const int keysBeforeRootOverflow =
-        requiredLeaves * LEAF_MAX_ENTRIES;
+    BPlusTreeMetadata metadata{};
 
-    const int totalKeys =
-        keysBeforeRootOverflow + 1;
-
-    std::cout
-        << "\nRequired leaves: "
-        << requiredLeaves
-        << '\n';
-
-    std::cout
-        << "Keys before root overflow: "
-        << keysBeforeRootOverflow
-        << '\n';
-
-    std::cout
-        << "Total test keys: "
-        << totalKeys
-        << '\n';
-
-    // ==========================================
-    // Insert all keys
-    // ==========================================
-
-    bool insertSuccess = true;
-
-    for (int key = 1;
-         key <= totalKeys;
-         key++)
+    if (!manager.readMetadata(metadata))
     {
-        RecordPointer pointer;
+        std::cout
+            << "Metadata read: FAIL\n";
 
-        pointer.pageId = key;
-        pointer.slotId = key;
-
-        if (!tree.insert(
-                key,
-                pointer))
-        {
-            std::cout
-                << "\nInsert failed at key: "
-                << key
-                << '\n';
-
-            insertSuccess = false;
-            break;
-        }
-
-        // Progress output
-        if (key % 10000 == 0)
-        {
-            std::cout
-                << "Inserted "
-                << key
-                << " keys...\n";
-        }
-    }
-
-    std::cout
-        << "\nLarge insertion: "
-        << (insertSuccess
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    if (!insertSuccess)
-    {
-        bpm.FlushAllPages();
         return 1;
     }
 
-    // ==========================================
-    // Read root
-    // ==========================================
-
-    int rootPageId =
-        tree.getRootPageId();
-
     std::cout
-        << "\nRoot Page ID: "
-        << rootPageId
+        << "Recovered Root: "
+        << metadata.rootPageId
         << '\n';
 
-    InternalPage root{};
-
-    bool rootRead =
-        tree.readInternalPage(
-            rootPageId,
-            root);
+    bool metadataValid =
+        metadata.rootPageId != -1;
 
     std::cout
-        << "Root read: "
-        << (rootRead
+        << "Metadata recovery: "
+        << (metadataValid
                 ? "PASS"
                 : "FAIL")
         << '\n';
 
-    if (!rootRead)
-    {
+    if (!metadataValid)
         return 1;
-    }
 
-    // ==========================================
-    // Root should now be a NEW root.
-    //
-    // Its children should be internal pages.
-    // ==========================================
-
-    bool rootIsInternal =
-        root.header.type ==
-        BPlusPageType::INTERNAL;
-
-    bool rootParentCorrect =
-        root.header.parentPageId == -1;
-
-    std::cout
-        << "\n========== ROOT VALIDATION ==========\n";
-
-    std::cout
-        << "Root is INTERNAL: "
-        << (rootIsInternal
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    std::cout
-        << "Root parent = -1: "
-        << (rootParentCorrect
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    std::cout
-        << "Root size: "
-        << root.header.size
-        << '\n';
-
-    std::cout
-        << "Root first child: "
-        << root.firstChildPageId
-        << '\n';
-
-    for (int i = 0;
-         i < root.header.size;
-         i++)
-    {
-        std::cout
-            << "Root entry "
-            << i
-            << ": key="
-            << root.entries[i].key
-            << ", child="
-            << root.entries[i].childPageId
-            << '\n';
-    }
-
-    // ==========================================
-    // Root should have exactly 2 children
-    // after splitting.
-    //
-    // Therefore:
-    //
-    // root.header.size == 1
-    //
-    // firstChild -> left internal
-    // entries[0] -> right internal
-    // ==========================================
-
-    bool rootSizeCorrect =
-        root.header.size == 1;
-
-    bool rootChildrenCorrect =
-        root.firstChildPageId != -1 &&
-        root.entries[0].childPageId != -1;
-
-    std::cout
-        << "\nRoot size = 1: "
-        << (rootSizeCorrect
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    std::cout
-        << "Root has two children: "
-        << (rootChildrenCorrect
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    // ==========================================
-    // Read left internal node
-    // ==========================================
-
-    int leftInternalPageId =
-        root.firstChildPageId;
-
-    int rightInternalPageId =
-        root.entries[0].childPageId;
-
-    InternalPage leftInternal{};
-    InternalPage rightInternal{};
-
-    bool leftRead =
-        tree.readInternalPage(
-            leftInternalPageId,
-            leftInternal);
-
-    bool rightRead =
-        tree.readInternalPage(
-            rightInternalPageId,
-            rightInternal);
-
-    std::cout
-        << "\nLeft internal read: "
-        << (leftRead
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    std::cout
-        << "Right internal read: "
-        << (rightRead
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    if (!leftRead ||
-        !rightRead)
-    {
-        return 1;
-    }
-
-    // ==========================================
-    // Parent pointers
-    // ==========================================
-
-    bool leftParentCorrect =
-        leftInternal.header.parentPageId ==
-        rootPageId;
-
-    bool rightParentCorrect =
-        rightInternal.header.parentPageId ==
-        rootPageId;
-
-    std::cout
-        << "\n========== INTERNAL PARENT POINTERS ==========\n";
-
-    std::cout
-        << "Left internal parent: "
-        << (leftParentCorrect
-                ? "PASS"
-                : "FAIL")
-        << " ("
-        << leftInternal.header.parentPageId
-        << ")\n";
-
-    std::cout
-        << "Right internal parent: "
-        << (rightParentCorrect
-                ? "PASS"
-                : "FAIL")
-        << " ("
-        << rightInternal.header.parentPageId
-        << ")\n";
-
-    // ==========================================
-    // Internal sizes
-    // ==========================================
-
-    std::cout
-        << "\n========== INTERNAL SIZES ==========\n";
-
-    std::cout
-        << "Left internal size: "
-        << leftInternal.header.size
-        << '\n';
-
-    std::cout
-        << "Right internal size: "
-        << rightInternal.header.size
-        << '\n';
-
-    bool leftNotFull =
-        leftInternal.header.size <
-        INTERNAL_MAX_ENTRIES;
-
-    bool rightNotFull =
-        rightInternal.header.size <
-        INTERNAL_MAX_ENTRIES;
-
-    std::cout
-        << "Left internal valid size: "
-        << (leftNotFull
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    std::cout
-        << "Right internal valid size: "
-        << (rightNotFull
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    // ==========================================
-    // Separator validation
-    // ==========================================
-
-    int rootSeparator =
-        root.entries[0].key;
-
-    std::cout
-        << "\nRoot separator: "
-        << rootSeparator
-        << '\n';
-
-    bool separatorValid =
-        rootSeparator > 0;
-
-    if (leftInternal.header.size > 0 &&
-        rightInternal.header.size > 0)
-    {
-        int leftLastKey =
-            leftInternal.entries[
-                leftInternal.header.size - 1
-            ].key;
-
-        int rightFirstKey =
-            rightInternal.entries[0].key;
-
-        separatorValid =
-            separatorValid &&
-            leftLastKey < rootSeparator &&
-            rightFirstKey >= rootSeparator;
-
-        std::cout
-            << "Left last separator: "
-            << leftLastKey
-            << '\n';
-
-        std::cout
-            << "Right first separator: "
-            << rightFirstKey
-            << '\n';
-    }
-
-    std::cout
-        << "Separator ordering: "
-        << (separatorValid
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    // ==========================================
-    // Search validation
-    //
-    // Test important boundary keys instead
-    // of reading all 172k results.
-    // ==========================================
+    // =========================================================
+    // SEARCH TEST
+    // =========================================================
 
     int testKeys[] =
     {
         1,
         339,
         340,
+        341,
         1000,
         50000,
-        100000,
-        150000,
-        keysBeforeRootOverflow,
-        totalKeys
+        100000
     };
 
-    bool searchCorrect = true;
+    bool allSearchesPassed = true;
 
     std::cout
         << "\n========== SEARCH VALIDATION ==========\n";
@@ -4675,71 +5155,97 @@ int main()
         RecordPointer result =
             tree.search(key);
 
-        bool correct =
-            result.pageId == key &&
+        bool found =
+            result.pageId != -1 &&
+            result.slotId != -1;
+
+        bool pointerCorrect =
+            found &&
             result.slotId == key;
+
+        bool passed =
+            found &&
+            pointerCorrect;
 
         std::cout
             << "Search "
             << key
             << ": "
-            << (correct
+            << (passed
                     ? "PASS"
                     : "FAIL")
             << '\n';
 
-        if (!correct)
+        if (!passed)
         {
-            searchCorrect = false;
+            std::cout
+                << "  Returned pageId = "
+                << result.pageId
+                << '\n';
+
+            std::cout
+                << "  Returned slotId = "
+                << result.slotId
+                << '\n';
+
+            allSearchesPassed = false;
         }
     }
 
-    // ==========================================
-    // Final result
-    // ==========================================
+    // =========================================================
+    // MISSING KEY
+    // =========================================================
 
-    bool allPassed =
-        insertSuccess &&
-        rootRead &&
-        rootIsInternal &&
-        rootParentCorrect &&
-        rootSizeCorrect &&
-        rootChildrenCorrect &&
-        leftRead &&
-        rightRead &&
-        leftParentCorrect &&
-        rightParentCorrect &&
-        leftNotFull &&
-        rightNotFull &&
-        separatorValid &&
-        searchCorrect;
+    RecordPointer missing =
+        tree.search(100001);
+
+    bool missingKeyPassed =
+        missing.pageId == -1 &&
+        missing.slotId == -1;
+
+    std::cout
+        << "\nSearch missing key 100001: "
+        << (missingKeyPassed
+                ? "PASS"
+                : "FAIL")
+        << '\n';
+
+    if (!missingKeyPassed)
+    {
+        std::cout
+            << "Returned pageId = "
+            << missing.pageId
+            << '\n';
+
+        std::cout
+            << "Returned slotId = "
+            << missing.slotId
+            << '\n';
+    }
+
+    // =========================================================
+    // FINAL RESULT
+    // =========================================================
+
+    bool passed =
+        metadataValid &&
+        allSearchesPassed &&
+        missingKeyPassed;
 
     std::cout
         << "\n========================================\n";
 
-    if (allPassed)
-    {
-        std::cout
-            << "DAY 15: INTERNAL NODE SPLIT PASS\n";
-    }
-    else
-    {
-        std::cout
-            << "DAY 15: INTERNAL NODE SPLIT FAIL\n";
-    }
+    std::cout
+        << "DAY 17: PERSISTENT SEARCH "
+        << (passed
+                ? "PASS"
+                : "FAIL")
+        << '\n';
 
     std::cout
         << "========================================\n";
 
-    // ==========================================
-    // Flush
-    // ==========================================
+    bufferPool.FlushAllPages();
 
-    bpm.FlushAllPages();
-
-    std::cout
-        << "\nDisk flush completed.\n";
-
-
-    return allPassed ? 0 : 1;
+    return passed ? 0 : 1;
 }
