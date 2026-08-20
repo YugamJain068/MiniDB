@@ -17,6 +17,7 @@ public:
 
     std::vector<Row> selectAll();
     Row readRow(int pageId, int slotId);
+    const std::string& getFilename() const;
 
 private:
     std::string filename;

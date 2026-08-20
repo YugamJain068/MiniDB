@@ -4741,10 +4741,8 @@
 //     std::cout
 //         << "\nDisk flush completed.\n";
 
-
 //     return allPassed ? 0 : 1;
 // }
-
 
 // #include <iostream>
 // #include <cstdio>
@@ -5057,195 +5055,826 @@
 //     return 0;
 // }
 
+// #include <iostream>
+
+// #include "bptree/b_plus_tree.h"
+// #include "bptree/b_plus_tree_page_manager.h"
+// #include "buffer/buffer_pool_manager.h"
+
+// int main()
+// {
+//     const std::string filename =
+//         "../data/day16_test.idx";
+
+//     // IMPORTANT:
+//     // Do NOT delete the file.
+//     // Day 17 tests persistence across program executions.
+
+//     // =========================================================
+//     // OPEN EXISTING INDEX
+//     // =========================================================
+
+//     BufferPoolManager bufferPool(20);
+
+//     BPlusTree tree(
+//         &bufferPool,
+//         filename);
+
+//     if (!tree.initialize())
+//     {
+//         std::cout
+//             << "Tree initialization: FAIL\n";
+
+//         return 1;
+//     }
+
+//     std::cout
+//         << "\n========== DAY 17: PERSISTENT SEARCH ==========\n";
+
+//     // =========================================================
+//     // READ METADATA
+//     // =========================================================
+
+//     BPlusTreePageManager manager(
+//         bufferPool,
+//         filename);
+
+//     BPlusTreeMetadata metadata{};
+
+//     if (!manager.readMetadata(metadata))
+//     {
+//         std::cout
+//             << "Metadata read: FAIL\n";
+
+//         return 1;
+//     }
+
+//     std::cout
+//         << "Recovered Root: "
+//         << metadata.rootPageId
+//         << '\n';
+
+//     bool metadataValid =
+//         metadata.rootPageId != -1;
+
+//     std::cout
+//         << "Metadata recovery: "
+//         << (metadataValid
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     if (!metadataValid)
+//         return 1;
+
+//     // =========================================================
+//     // SEARCH TEST
+//     // =========================================================
+
+//     int testKeys[] =
+//     {
+//         1,
+//         339,
+//         340,
+//         341,
+//         1000,
+//         50000,
+//         100000
+//     };
+
+//     bool allSearchesPassed = true;
+
+//     std::cout
+//         << "\n========== SEARCH VALIDATION ==========\n";
+
+//     for (int key : testKeys)
+//     {
+//         RecordPointer result =
+//             tree.search(key);
+
+//         bool found =
+//             result.pageId != -1 &&
+//             result.slotId != -1;
+
+//         bool pointerCorrect =
+//             found &&
+//             result.slotId == key;
+
+//         bool passed =
+//             found &&
+//             pointerCorrect;
+
+//         std::cout
+//             << "Search "
+//             << key
+//             << ": "
+//             << (passed
+//                     ? "PASS"
+//                     : "FAIL")
+//             << '\n';
+
+//         if (!passed)
+//         {
+//             std::cout
+//                 << "  Returned pageId = "
+//                 << result.pageId
+//                 << '\n';
+
+//             std::cout
+//                 << "  Returned slotId = "
+//                 << result.slotId
+//                 << '\n';
+
+//             allSearchesPassed = false;
+//         }
+//     }
+
+//     // =========================================================
+//     // MISSING KEY
+//     // =========================================================
+
+//     RecordPointer missing =
+//         tree.search(100001);
+
+//     bool missingKeyPassed =
+//         missing.pageId == -1 &&
+//         missing.slotId == -1;
+
+//     std::cout
+//         << "\nSearch missing key 100001: "
+//         << (missingKeyPassed
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     if (!missingKeyPassed)
+//     {
+//         std::cout
+//             << "Returned pageId = "
+//             << missing.pageId
+//             << '\n';
+
+//         std::cout
+//             << "Returned slotId = "
+//             << missing.slotId
+//             << '\n';
+//     }
+
+//     // =========================================================
+//     // FINAL RESULT
+//     // =========================================================
+
+//     bool passed =
+//         metadataValid &&
+//         allSearchesPassed &&
+//         missingKeyPassed;
+
+//     std::cout
+//         << "\n========================================\n";
+
+//     std::cout
+//         << "DAY 17: PERSISTENT SEARCH "
+//         << (passed
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     std::cout
+//         << "========================================\n";
+
+//     bufferPool.FlushAllPages();
+
+//     return passed ? 0 : 1;
+// }
+
+// #include <iostream>
+
+// #include "executor/sequential_scan.h"
+// #include "storage/table.h"
+// #include "buffer/buffer_pool_manager.h"
+// #include "models/row.h"
+
+// int main()
+// {
+//     const std::string tableName =
+//         "day18_users";
+
+//     BufferPoolManager bpm(5);
+
+//     Table table(
+//         tableName,
+//         bpm);
+
+//     // Insert test rows
+//     for (int i = 1; i <= 10; i++)
+//     {
+//         Row row{};
+
+//         row.id = i;
+
+//         std::snprintf(
+//             row.name,
+//             sizeof(row.name),
+//             "User%d",
+//             i);
+
+//         table.insert(row);
+//     }
+
+//     // ================================
+//     // Sequential Scan
+//     // ================================
+
+//     SequentialScan scan(
+//         table,
+//         bpm);
+
+//     bool opened =
+//         scan.open();
+
+//     if (!opened)
+//     {
+//         std::cout
+//             << "Scan open: FAIL\n";
+
+//         return 1;
+//     }
+
+//     Row row;
+
+//     int count = 0;
+
+//     bool correct = true;
+
+//     while (scan.next(row))
+//     {
+//         std::cout
+//             << "Row: "
+//             << row.id
+//             << " "
+//             << row.name
+//             << '\n';
+
+//         if (row.id != count + 1)
+//             correct = false;
+
+//         count++;
+//     }
+
+//     scan.close();
+
+//     std::cout
+//         << "\nRows scanned: "
+//         << count
+//         << '\n';
+
+//     std::cout
+//         << "Sequential scan: "
+//         << ((correct && count == 10)
+//                 ? "PASS"
+//                 : "FAIL")
+//         << '\n';
+
+//     return 0;
+// }
+
+// #include <iostream>
+
+// #include "executor/sequential_scan.h"
+// #include "executor/filter.h"
+
+// #include "storage/table.h"
+// #include "buffer/buffer_pool_manager.h"
+// #include "models/row.h"
+
+// int main()
+// {
+//     const std::string tableName =
+//         "day19_test";
+
+//     BufferPoolManager bpm(5);
+
+//     Table table(
+//         tableName,
+//         bpm);
+
+//     // ========================================
+//     // Insert test rows
+//     // ========================================
+
+//     for (int i = 1; i <= 10; i++)
+//     {
+//         Row row{};
+
+//         row.id = i;
+
+//         std::snprintf(
+//             row.name,
+//             sizeof(row.name),
+//             "User%d",
+//             i);
+
+//         table.insert(row);
+//     }
+
+//     // ========================================
+//     // Sequential Scan
+//     // ========================================
+
+//     SequentialScan scan(
+//         table,
+//         bpm);
+
+//     // ========================================
+//     // Filter: id = 5
+//     // ========================================
+
+//     Filter filter(
+//         scan,
+//         5);
+
+//     bool opened =
+//         filter.open();
+
+//     if (!opened)
+//     {
+//         std::cout
+//             << "Filter open: FAIL\n";
+
+//         return 1;
+//     }
+
+//     Row row;
+
+//     int count = 0;
+
+//     bool correct = true;
+
+//     while (filter.next(row))
+//     {
+//         std::cout
+//             << "Matched Row: "
+//             << row.id
+//             << " "
+//             << row.name
+//             << '\n';
+
+//         if (row.id != 5)
+//         {
+//             correct = false;
+//         }
+
+//         count++;
+//     }
+
+//     filter.close();
+
+//     // ========================================
+//     // Validation
+//     // ========================================
+
+//     std::cout
+//         << "\nMatched rows: "
+//         << count
+//         << '\n';
+
+//     if (correct && count == 1)
+//     {
+//         std::cout
+//             << "Filter test: PASS\n";
+//     }
+//     else
+//     {
+//         std::cout
+//             << "Filter test: FAIL\n";
+//     }
+
+//     return 0;
+// }
+
+// #include <iostream>
+
+// #include "executor/index_scan.h"
+
+// #include "storage/table.h"
+// #include "buffer/buffer_pool_manager.h"
+// #include "models/row.h"
+
+// int main()
+// {
+//     const std::string tableName =
+//         "day20_test";
+
+//     const std::string indexFile =
+//         "../data/day20_test.idx";
+
+//     BufferPoolManager bpm(10);
+
+//     BPlusTree index(
+//         &bpm,
+//         indexFile);
+
+//     if (!index.initialize())
+//     {
+//         std::cout
+//             << "Index initialization: FAIL\n";
+
+//         return 1;
+//     }
+
+//     Table table(
+//         tableName,
+//         bpm);
+
+//     // ========================================
+//     // Insert rows
+//     // ========================================
+
+//     for (int i = 1; i <= 10; i++)
+//     {
+//         Row row{};
+
+//         row.id = i;
+
+//         std::snprintf(
+//             row.name,
+//             sizeof(row.name),
+//             "User%d",
+//             i);
+
+//         RecordPointer ptr =
+//             table.insert(row);
+
+//         if (!index.insert(i, ptr))
+//         {
+//             std::cout
+//                 << "Index insertion failed: "
+//                 << i
+//                 << '\n';
+
+//             return 1;
+//         }
+//     }
+
+//     // ========================================
+//     // Index Scan
+//     // ========================================
+
+//     IndexScan scan(
+//     table,
+//     index,
+//     5);
+
+//     if (!scan.open())
+//     {
+//         std::cout
+//             << "Index scan open: FAIL\n";
+
+//         return 1;
+//     }
+
+//     Row row;
+
+//     int count = 0;
+
+//     bool correct = true;
+
+//     while (scan.next(row))
+//     {
+//         std::cout
+//             << "Matched Row: "
+//             << row.id
+//             << " "
+//             << row.name
+//             << '\n';
+
+//         if (row.id != 5)
+//         {
+//             correct = false;
+//         }
+
+//         count++;
+//     }
+
+//     scan.close();
+
+//     // ========================================
+//     // Validation
+//     // ========================================
+
+//     std::cout
+//         << "\nMatched rows: "
+//         << count
+//         << '\n';
+
+//     if (correct && count == 1)
+//     {
+//         std::cout
+//             << "Index scan: PASS\n";
+//     }
+//     else
+//     {
+//         std::cout
+//             << "Index scan: FAIL\n";
+//     }
+
+//     // ========================================
+// // Test missing key
+// // ========================================
+
+// {
+//     IndexScan scan(
+//         table,
+//         index,
+//         100);
+
+//     scan.open();
+
+//     Row row;
+
+//     int count = 0;
+
+//     while (scan.next(row))
+//     {
+//         count++;
+//     }
+
+//     scan.close();
+
+//     std::cout
+//         << "Missing key matched rows: "
+//         << count
+//         << '\n';
+
+//     if (count == 0)
+//     {
+//         std::cout
+//             << "Missing key search: PASS\n";
+//     }
+//     else
+//     {
+//         std::cout
+//             << "Missing key search: FAIL\n";
+//     }
+// }
+
+//     return 0;
+// }
 
 #include <iostream>
+#include <cstdio>
 
-#include "bptree/b_plus_tree.h"
-#include "bptree/b_plus_tree_page_manager.h"
+#include "executor/sequential_scan.h"
+#include "executor/projection.h"
+
+#include "storage/table.h"
 #include "buffer/buffer_pool_manager.h"
+#include "models/row.h"
+
+#include <cstring>
 
 int main()
 {
-    const std::string filename =
-        "../data/day16_test.idx";
+    const std::string tableName =
+        "day21_test";
 
-    // IMPORTANT:
-    // Do NOT delete the file.
-    // Day 17 tests persistence across program executions.
+    BufferPoolManager bpm(5);
 
-    // =========================================================
-    // OPEN EXISTING INDEX
-    // =========================================================
+    Table table(
+        tableName,
+        bpm);
 
-    BufferPoolManager bufferPool(20);
+    // ========================================
+    // Insert test data
+    // ========================================
 
-    BPlusTree tree(
-        &bufferPool,
-        filename);
-
-    if (!tree.initialize())
+    for (int i = 1; i <= 5; i++)
     {
-        std::cout
-            << "Tree initialization: FAIL\n";
+        Row row{};
 
-        return 1;
+        row.id = i;
+
+        std::snprintf(
+            row.name,
+            sizeof(row.name),
+            "User%d",
+            i);
+
+        table.insert(row);
     }
 
-    std::cout
-        << "\n========== DAY 17: PERSISTENT SEARCH ==========\n";
+    // ========================================
+    // TEST 1: Projection ID
+    // ========================================
 
-    // =========================================================
-    // READ METADATA
-    // =========================================================
-
-    BPlusTreePageManager manager(
-        bufferPool,
-        filename);
-
-    BPlusTreeMetadata metadata{};
-
-    if (!manager.readMetadata(metadata))
     {
         std::cout
-            << "Metadata read: FAIL\n";
+            << "\n========== PROJECTION ID ==========\n";
 
-        return 1;
-    }
+        SequentialScan scan(
+            table,
+            bpm);
 
-    std::cout
-        << "Recovered Root: "
-        << metadata.rootPageId
-        << '\n';
+        Projection projection(
+            scan,
+            Column::ID);
 
-    bool metadataValid =
-        metadata.rootPageId != -1;
+        projection.open();
 
-    std::cout
-        << "Metadata recovery: "
-        << (metadataValid
-                ? "PASS"
-                : "FAIL")
-        << '\n';
+        Row row{};
 
-    if (!metadataValid)
-        return 1;
+        int count = 0;
+        bool correct = true;
 
-    // =========================================================
-    // SEARCH TEST
-    // =========================================================
-
-    int testKeys[] =
-    {
-        1,
-        339,
-        340,
-        341,
-        1000,
-        50000,
-        100000
-    };
-
-    bool allSearchesPassed = true;
-
-    std::cout
-        << "\n========== SEARCH VALIDATION ==========\n";
-
-    for (int key : testKeys)
-    {
-        RecordPointer result =
-            tree.search(key);
-
-        bool found =
-            result.pageId != -1 &&
-            result.slotId != -1;
-
-        bool pointerCorrect =
-            found &&
-            result.slotId == key;
-
-        bool passed =
-            found &&
-            pointerCorrect;
-
-        std::cout
-            << "Search "
-            << key
-            << ": "
-            << (passed
-                    ? "PASS"
-                    : "FAIL")
-            << '\n';
-
-        if (!passed)
+        while (projection.next(row))
         {
             std::cout
-                << "  Returned pageId = "
-                << result.pageId
+                << "Projected ID: "
+                << row.id
                 << '\n';
 
+            // ID should remain
+            if (row.id != count + 1)
+            {
+                correct = false;
+            }
+
+            // NAME should be removed
+            if (row.name[0] != '\0')
+            {
+                correct = false;
+            }
+
+            count++;
+        }
+
+        projection.close();
+
+        std::cout
+            << "Projected rows: "
+            << count
+            << '\n';
+
+        if (correct && count == 5)
+        {
             std::cout
-                << "  Returned slotId = "
-                << result.slotId
-                << '\n';
-
-            allSearchesPassed = false;
+                << "Projection ID: PASS\n";
+        }
+        else
+        {
+            std::cout
+                << "Projection ID: FAIL\n";
         }
     }
 
-    // =========================================================
-    // MISSING KEY
-    // =========================================================
+    // ========================================
+    // TEST 2: Projection NAME
+    // ========================================
 
-    RecordPointer missing =
-        tree.search(100001);
-
-    bool missingKeyPassed =
-        missing.pageId == -1 &&
-        missing.slotId == -1;
-
-    std::cout
-        << "\nSearch missing key 100001: "
-        << (missingKeyPassed
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    if (!missingKeyPassed)
     {
         std::cout
-            << "Returned pageId = "
-            << missing.pageId
-            << '\n';
+            << "\n========== PROJECTION NAME ==========\n";
+
+        SequentialScan scan(
+            table,
+            bpm);
+
+        Projection projection(
+            scan,
+            Column::NAME);
+
+        projection.open();
+
+        Row row{};
+
+        int count = 0;
+        bool correct = true;
+
+        while (projection.next(row))
+        {
+            std::cout
+                << "Projected NAME: "
+                << row.name
+                << '\n';
+
+            // ID should be removed
+            if (row.id != 0)
+            {
+                correct = false;
+            }
+
+            // NAME should remain
+            std::string expected =
+                "User" + std::to_string(count + 1);
+
+            if (std::strcmp(
+                    row.name,
+                    expected.c_str()) != 0)
+            {
+                correct = false;
+            }
+
+            count++;
+        }
+
+        projection.close();
 
         std::cout
-            << "Returned slotId = "
-            << missing.slotId
+            << "Projected rows: "
+            << count
             << '\n';
+
+        if (correct && count == 5)
+        {
+            std::cout
+                << "Projection NAME: PASS\n";
+        }
+        else
+        {
+            std::cout
+                << "Projection NAME: FAIL\n";
+        }
     }
 
-    // =========================================================
+    // ========================================
+    // TEST 3: Projection ALL
+    // ========================================
+
+    {
+        std::cout
+            << "\n========== PROJECTION ALL ==========\n";
+
+        SequentialScan scan(
+            table,
+            bpm);
+
+        Projection projection(
+            scan,
+            Column::ALL);
+
+        projection.open();
+
+        Row row{};
+
+        int count = 0;
+        bool correct = true;
+
+        while (projection.next(row))
+        {
+            std::cout
+                << "Projected Row: "
+                << row.id
+                << " "
+                << row.name
+                << '\n';
+
+            // ID should remain
+            if (row.id != count + 1)
+            {
+                correct = false;
+            }
+
+            // NAME should remain
+            std::string expected =
+                "User" + std::to_string(count + 1);
+
+            if (std::strcmp(
+                    row.name,
+                    expected.c_str()) != 0)
+            {
+                correct = false;
+            }
+
+            count++;
+        }
+
+        projection.close();
+
+        std::cout
+            << "Projected rows: "
+            << count
+            << '\n';
+
+        if (correct && count == 5)
+        {
+            std::cout
+                << "Projection ALL: PASS\n";
+        }
+        else
+        {
+            std::cout
+                << "Projection ALL: FAIL\n";
+        }
+    }
+
+    // ========================================
     // FINAL RESULT
-    // =========================================================
-
-    bool passed =
-        metadataValid &&
-        allSearchesPassed &&
-        missingKeyPassed;
+    // ========================================
 
     std::cout
-        << "\n========================================\n";
-
-    std::cout
-        << "DAY 17: PERSISTENT SEARCH "
-        << (passed
-                ? "PASS"
-                : "FAIL")
-        << '\n';
-
-    std::cout
+        << "\n========================================\n"
+        << "DAY 21: PROJECTION TEST COMPLETE\n"
         << "========================================\n";
 
-    bufferPool.FlushAllPages();
-
-    return passed ? 0 : 1;
+    return 0;
 }

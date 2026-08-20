@@ -15,6 +15,10 @@ add_executable(
     src/parser/token.cpp
     src/parser/lexer.cpp
     src/executor/executor.cpp
+    src/executor/sequential_scan.cpp
+    src/executor/filter.cpp
+    src/executor/index_scan.cpp
+    src/executor/projection.cpp
     src/buffer/buffer_pool_manager.cpp
     src/buffer/lru_replacer.cpp
     src/bptree/b_plus_tree.cpp

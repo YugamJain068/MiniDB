@@ -95,3 +95,8 @@ Row Table::readRow(int pageId, int slotId)
 
     return row;
 }
+
+const std::string& Table::getFilename() const
+{
+    return filename;
+}
