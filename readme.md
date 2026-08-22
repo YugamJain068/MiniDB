@@ -318,27 +318,38 @@ MiniDB > SELECT * FROM users;
 * Node split
 * Leaf nodes
 * Internal nodes
+* Sequential Scan
+* Index Scan
+* Filter operator
+* Projection operator
+* ID / NAME / ALL projections
+* Filter → Projection pipeline
+* Index-based SELECT WHERE
+* Sequential SELECT *
+* B+ Tree index persistence
+* Index validation
+* Buffer pool integration
 
 ---
 
 # Upcoming Phases
 
-## Phase 6
-
-* Query Execution Engine
-* Sequential Scan
-* Index Scan
-* Projection
-* Filter operators
-
 ## Phase 7
+
+* Query Engine
+* Operator Pipeline
+* Operator Pipeline
+* Delete and Update
+
+
+## Phase 8
 
 * Cost-Based Query Optimizer
 * Execution plan generation
 * Index vs sequential scan selection
 * Basic table statistics
 
-## Phase 8
+## Phase 9
 
 * Transactions
 * BEGIN
