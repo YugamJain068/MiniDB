@@ -11,10 +11,12 @@ BPlusTree::BPlusTree(
       pageManager(*bpm, filename),
       rootPageId(-1)
 {
+    
 }
 
 bool BPlusTree::initialize()
-{
+{   
+    std::cout << ">>> BPlusTree::initialize() CALLED\n";
     if (!pageManager.initializeIndex())
         return false;
 

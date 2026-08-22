@@ -5621,260 +5621,662 @@
 //     return 0;
 // }
 
+// #include <iostream>
+// #include <cstdio>
+
+// #include "executor/sequential_scan.h"
+// #include "executor/projection.h"
+
+// #include "storage/table.h"
+// #include "buffer/buffer_pool_manager.h"
+// #include "models/row.h"
+
+// #include <cstring>
+
+// int main()
+// {
+//     const std::string tableName =
+//         "day21_test";
+
+//     BufferPoolManager bpm(5);
+
+//     Table table(
+//         tableName,
+//         bpm);
+
+//     // ========================================
+//     // Insert test data
+//     // ========================================
+
+//     for (int i = 1; i <= 5; i++)
+//     {
+//         Row row{};
+
+//         row.id = i;
+
+//         std::snprintf(
+//             row.name,
+//             sizeof(row.name),
+//             "User%d",
+//             i);
+
+//         table.row);
+//     }
+
+//     // ========================================
+//     // TEST 1: Projection ID
+//     // ========================================
+
+//     {
+//         std::cout
+//             << "\n========== PROJECTION ID ==========\n";
+
+//         SequentialScan scan(
+//             table,
+//             bpm);
+
+//         Projection projection(
+//             scan,
+//             Column::ID);
+
+//         projection.open();
+
+//         Row row{};
+
+//         int count = 0;
+//         bool correct = true;
+
+//         while (projection.next(row))
+//         {
+//             std::cout
+//                 << "Projected ID: "
+//                 << row.id
+//                 << '\n';
+
+//             // ID should remain
+//             if (row.id != count + 1)
+//             {
+//                 correct = false;
+//             }
+
+//             // NAME should be removed
+//             if (row.name[0] != '\0')
+//             {
+//                 correct = false;
+//             }
+
+//             count++;
+//         }
+
+//         projection.close();
+
+//         std::cout
+//             << "Projected rows: "
+//             << count
+//             << '\n';
+
+//         if (correct && count == 5)
+//         {
+//             std::cout
+//                 << "Projection ID: PASS\n";
+//         }
+//         else
+//         {
+//             std::cout
+//                 << "Projection ID: FAIL\n";
+//         }
+//     }
+
+//     // ========================================
+//     // TEST 2: Projection NAME
+//     // ========================================
+
+//     {
+//         std::cout
+//             << "\n========== PROJECTION NAME ==========\n";
+
+//         SequentialScan scan(
+//             table,
+//             bpm);
+
+//         Projection projection(
+//             scan,
+//             Column::NAME);
+
+//         projection.open();
+
+//         Row row{};
+
+//         int count = 0;
+//         bool correct = true;
+
+//         while (projection.next(row))
+//         {
+//             std::cout
+//                 << "Projected NAME: "
+//                 << row.name
+//                 << '\n';
+
+//             // ID should be removed
+//             if (row.id != 0)
+//             {
+//                 correct = false;
+//             }
+
+//             // NAME should remain
+//             std::string expected =
+//                 "User" + std::to_string(count + 1);
+
+//             if (std::strcmp(
+//                     row.name,
+//                     expected.c_str()) != 0)
+//             {
+//                 correct = false;
+//             }
+
+//             count++;
+//         }
+
+//         projection.close();
+
+//         std::cout
+//             << "Projected rows: "
+//             << count
+//             << '\n';
+
+//         if (correct && count == 5)
+//         {
+//             std::cout
+//                 << "Projection NAME: PASS\n";
+//         }
+//         else
+//         {
+//             std::cout
+//                 << "Projection NAME: FAIL\n";
+//         }
+//     }
+
+//     // ========================================
+//     // TEST 3: Projection ALL
+//     // ========================================
+
+//     {
+//         std::cout
+//             << "\n========== PROJECTION ALL ==========\n";
+
+//         SequentialScan scan(
+//             table,
+//             bpm);
+
+//         Projection projection(
+//             scan,
+//             Column::ALL);
+
+//         projection.open();
+
+//         Row row{};
+
+//         int count = 0;
+//         bool correct = true;
+
+//         while (projection.next(row))
+//         {
+//             std::cout
+//                 << "Projected Row: "
+//                 << row.id
+//                 << " "
+//                 << row.name
+//                 << '\n';
+
+//             // ID should remain
+//             if (row.id != count + 1)
+//             {
+//                 correct = false;
+//             }
+
+//             // NAME should remain
+//             std::string expected =
+//                 "User" + std::to_string(count + 1);
+
+//             if (std::strcmp(
+//                     row.name,
+//                     expected.c_str()) != 0)
+//             {
+//                 correct = false;
+//             }
+
+//             count++;
+//         }
+
+//         projection.close();
+
+//         std::cout
+//             << "Projected rows: "
+//             << count
+//             << '\n';
+
+//         if (correct && count == 5)
+//         {
+//             std::cout
+//                 << "Projection ALL: PASS\n";
+//         }
+//         else
+//         {
+//             std::cout
+//                 << "Projection ALL: FAIL\n";
+//         }
+//     }
+
+//     // ========================================
+//     // FINAL RESULT
+//     // ========================================
+
+//     std::cout
+//         << "\n========================================\n"
+//         << "DAY 21: PROJECTION TEST COMPLETE\n"
+//         << "========================================\n";
+
+//     return 0;
+// }
+
+// #include "executor/sequential_scan.h"
+// #include "executor/filter.h"
+// #include "executor/projection.h"
+
+// #include "storage/table.h"
+// #include "buffer/buffer_pool_manager.h"
+// #include "models/row.h"
+
+// #include <iostream>
+// #include <cstdio>
+// #include <cstring>
+
+// int main()
+// {
+//     const std::string tableName =
+//         "day22_test";
+
+//     BufferPoolManager bpm(5);
+
+//     Table table(
+//         tableName,
+//         bpm);
+
+//     // ========================================
+//     // Insert test data
+//     // ========================================
+
+//     for (int i = 1; i <= 5; i++)
+//     {
+//         Row row{};
+
+//         row.id = i;
+
+//         std::snprintf(
+//             row.name,
+//             sizeof(row.name),
+//             "User%d",
+//             i);
+
+//         table.insert(row);
+//     }
+
+//     // ========================================
+//     // Sequential Scan
+//     // ========================================
+
+//     SequentialScan scan(
+//         table,
+//         bpm);
+
+//     // ========================================
+//     // Filter: id = 3
+//     // ========================================
+
+//     Filter filter(
+//         scan,
+//         3);
+
+//     // ========================================
+//     // Projection: ID
+//     // ========================================
+
+//     Projection projection(
+//         filter,
+//         Column::ID);
+
+//     projection.open();
+
+//     Row row{};
+
+//     int count = 0;
+//     bool correct = true;
+
+//     while (projection.next(row))
+//     {
+//         std::cout
+//             << "Result: "
+//             << row.id
+//             << " "
+//             << row.name
+//             << '\n';
+
+//         if (row.id != 3)
+//         {
+//             correct = false;
+//         }
+
+//         if (row.name[0] != '\0')
+//         {
+//             correct = false;
+//         }
+
+//         count++;
+//     }
+
+//     projection.close();
+
+//     // ========================================
+//     // Validation
+//     // ========================================
+
+//     std::cout
+//         << "\nMatched rows: "
+//         << count
+//         << '\n';
+
+//     if (correct && count == 1)
+//     {
+//         std::cout
+//             << "Filter -> Projection: PASS\n";
+//     }
+//     else
+//     {
+//         std::cout
+//             << "Filter -> Projection: FAIL\n";
+//     }
+
+//     return 0;
+// }
+
+#include "parser/lexer.h"
+#include "parser/sql_parser.h"
+#include "executor/executor.h"
+#include "database/database.h"
+
 #include <iostream>
-#include <cstdio>
-
-#include "executor/sequential_scan.h"
-#include "executor/projection.h"
-
-#include "storage/table.h"
-#include "buffer/buffer_pool_manager.h"
-#include "models/row.h"
-
-#include <cstring>
+#include <memory>
 
 int main()
 {
-    const std::string tableName =
-        "day21_test";
+    Database database;
 
-    BufferPoolManager bpm(5);
-
-    Table table(
-        tableName,
-        bpm);
+    Executor executor(database);
 
     // ========================================
-    // Insert test data
-    // ========================================
-
-    for (int i = 1; i <= 5; i++)
-    {
-        Row row{};
-
-        row.id = i;
-
-        std::snprintf(
-            row.name,
-            sizeof(row.name),
-            "User%d",
-            i);
-
-        table.insert(row);
-    }
-
-    // ========================================
-    // TEST 1: Projection ID
+    // CREATE
     // ========================================
 
     {
-        std::cout
-            << "\n========== PROJECTION ID ==========\n";
+        Lexer lexer(
+            "CREATE TABLE users;");
 
-        SequentialScan scan(
-            table,
-            bpm);
+        auto tokens =
+            lexer.tokenize();
 
-        Projection projection(
-            scan,
-            Column::ID);
+        SQLParser parser(tokens);
 
-        projection.open();
+        auto statement =
+            parser.parse();
 
-        Row row{};
-
-        int count = 0;
-        bool correct = true;
-
-        while (projection.next(row))
-        {
-            std::cout
-                << "Projected ID: "
-                << row.id
-                << '\n';
-
-            // ID should remain
-            if (row.id != count + 1)
-            {
-                correct = false;
-            }
-
-            // NAME should be removed
-            if (row.name[0] != '\0')
-            {
-                correct = false;
-            }
-
-            count++;
-        }
-
-        projection.close();
-
-        std::cout
-            << "Projected rows: "
-            << count
-            << '\n';
-
-        if (correct && count == 5)
-        {
-            std::cout
-                << "Projection ID: PASS\n";
-        }
-        else
-        {
-            std::cout
-                << "Projection ID: FAIL\n";
-        }
+        executor.execute(
+            statement.get());
     }
 
     // ========================================
-    // TEST 2: Projection NAME
+    // INSERT
     // ========================================
 
     {
-        std::cout
-            << "\n========== PROJECTION NAME ==========\n";
+        Lexer lexer(
+            "INSERT INTO users VALUES (1, 'Alice');");
 
-        SequentialScan scan(
-            table,
-            bpm);
+        auto tokens =
+            lexer.tokenize();
 
-        Projection projection(
-            scan,
-            Column::NAME);
+        SQLParser parser(tokens);
 
-        projection.open();
+        auto statement =
+            parser.parse();
 
-        Row row{};
-
-        int count = 0;
-        bool correct = true;
-
-        while (projection.next(row))
-        {
-            std::cout
-                << "Projected NAME: "
-                << row.name
-                << '\n';
-
-            // ID should be removed
-            if (row.id != 0)
-            {
-                correct = false;
-            }
-
-            // NAME should remain
-            std::string expected =
-                "User" + std::to_string(count + 1);
-
-            if (std::strcmp(
-                    row.name,
-                    expected.c_str()) != 0)
-            {
-                correct = false;
-            }
-
-            count++;
-        }
-
-        projection.close();
-
-        std::cout
-            << "Projected rows: "
-            << count
-            << '\n';
-
-        if (correct && count == 5)
-        {
-            std::cout
-                << "Projection NAME: PASS\n";
-        }
-        else
-        {
-            std::cout
-                << "Projection NAME: FAIL\n";
-        }
+        executor.execute(
+            statement.get());
     }
-
-    // ========================================
-    // TEST 3: Projection ALL
-    // ========================================
 
     {
-        std::cout
-            << "\n========== PROJECTION ALL ==========\n";
+        Lexer lexer(
+            "INSERT INTO users VALUES (2, 'Bob');");
 
-        SequentialScan scan(
-            table,
-            bpm);
+        auto tokens =
+            lexer.tokenize();
 
-        Projection projection(
-            scan,
-            Column::ALL);
+        SQLParser parser(tokens);
 
-        projection.open();
+        auto statement =
+            parser.parse();
 
-        Row row{};
+        executor.execute(
+            statement.get());
+    }
 
-        int count = 0;
-        bool correct = true;
+    {
+        Lexer lexer(
+            "INSERT INTO users VALUES (3, 'Charlie');");
 
-        while (projection.next(row))
-        {
-            std::cout
-                << "Projected Row: "
-                << row.id
-                << " "
-                << row.name
-                << '\n';
+        auto tokens =
+            lexer.tokenize();
 
-            // ID should remain
-            if (row.id != count + 1)
-            {
-                correct = false;
-            }
+        SQLParser parser(tokens);
 
-            // NAME should remain
-            std::string expected =
-                "User" + std::to_string(count + 1);
+        auto statement =
+            parser.parse();
 
-            if (std::strcmp(
-                    row.name,
-                    expected.c_str()) != 0)
-            {
-                correct = false;
-            }
-
-            count++;
-        }
-
-        projection.close();
-
-        std::cout
-            << "Projected rows: "
-            << count
-            << '\n';
-
-        if (correct && count == 5)
-        {
-            std::cout
-                << "Projection ALL: PASS\n";
-        }
-        else
-        {
-            std::cout
-                << "Projection ALL: FAIL\n";
-        }
+        executor.execute(
+            statement.get());
     }
 
     // ========================================
-    // FINAL RESULT
+    // SELECT *
     // ========================================
 
     std::cout
-        << "\n========================================\n"
-        << "DAY 21: PROJECTION TEST COMPLETE\n"
-        << "========================================\n";
+        << "\n========== SELECT ALL ==========\n";
+
+    {
+        Lexer lexer(
+            "SELECT * FROM users;");
+
+        auto tokens =
+            lexer.tokenize();
+
+        SQLParser parser(tokens);
+
+        auto statement =
+            parser.parse();
+
+        executor.execute(
+            statement.get());
+    }
+
+    // ========================================
+    // SELECT WHERE
+    // ========================================
+
+    std::cout
+        << "\n========== SELECT WHERE ==========\n";
+
+    {
+        Lexer lexer(
+            "SELECT * FROM users WHERE id = 3;");
+
+        auto tokens =
+            lexer.tokenize();
+
+        SQLParser parser(tokens);
+
+        auto statement =
+            parser.parse();
+
+        executor.execute(
+            statement.get());
+    }
+
+    {
+        Lexer lexer(
+            "SELECT * FROM users WHERE id = 999;");
+
+        auto tokens =
+            lexer.tokenize();
+
+        SQLParser parser(tokens);
+
+        auto statement =
+            parser.parse();
+
+        executor.execute(
+            statement.get());
+    }
+
+    std::cout
+        << "\n========== INDEX VALIDATION ==========\n";
+
+    {
+        Lexer lexer(
+            "SELECT * FROM users WHERE id = 1;");
+
+        auto tokens = lexer.tokenize();
+
+        SQLParser parser(tokens);
+
+        auto statement = parser.parse();
+
+        executor.execute(statement.get());
+    }
+
+    {
+        Lexer lexer(
+            "SELECT * FROM users WHERE id = 2;");
+
+        auto tokens = lexer.tokenize();
+
+        SQLParser parser(tokens);
+
+        auto statement = parser.parse();
+
+        executor.execute(statement.get());
+    }
+    {
+        Lexer lexer(
+            "SELECT * FROM users WHERE id = 3;");
+
+        auto tokens = lexer.tokenize();
+
+        SQLParser parser(tokens);
+
+        auto statement = parser.parse();
+
+        executor.execute(statement.get());
+    }
+    {
+        Lexer lexer(
+            "SELECT * FROM users WHERE id = 999;");
+
+        auto tokens = lexer.tokenize();
+
+        SQLParser parser(tokens);
+
+        auto statement = parser.parse();
+
+        executor.execute(statement.get());
+    }
 
     return 0;
 }
+
+
+// #include "parser/lexer.h"
+// #include "parser/sql_parser.h"
+// #include "executor/executor.h"
+// #include "database/database.h"
+
+// #include <iostream>
+// #include <memory>
+
+// int main()
+// {
+//     Database database;
+
+//     Executor executor(database);
+
+//     // ========================================
+//     // CREATE
+//     // ========================================
+
+//     {
+//         Lexer lexer(
+//             "CREATE TABLE users;");
+
+//         auto tokens =
+//             lexer.tokenize();
+
+//         SQLParser parser(tokens);
+
+//         auto statement =
+//             parser.parse();
+
+//         executor.execute(
+//             statement.get());
+//     }
+
+//     // ========================================
+//     // INSERT
+//     // ========================================
+
+//     {
+//         Lexer lexer(
+//             "INSERT INTO users VALUES (1, 'Alice');");
+
+//         auto tokens =
+//             lexer.tokenize();
+
+//         SQLParser parser(tokens);
+
+//         auto statement =
+//             parser.parse();
+
+//         executor.execute(
+//             statement.get());
+//     }
+
+
+//     std::cout
+//         << "\n========== SELECT WHERE ==========\n";
+
+//     {
+//         Lexer lexer(
+//             "SELECT * FROM users WHERE id = 1;");
+
+//         auto tokens =
+//             lexer.tokenize();
+
+//         SQLParser parser(tokens);
+
+//         auto statement =
+//             parser.parse();
+
+//         executor.execute(
+//             statement.get());
+//     }
+
+//     return 0;
+// }

@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <algorithm>
+#include <stdexcept>
 
 using namespace std;
 
@@ -13,6 +14,14 @@ Database::Database()
           &bufferPool,
           "../data/database.idx")
 {
+    if (!index.initialize())
+    {
+        std::cerr
+        << "Failed to initialize B+ Tree index\n";
+
+    throw std::runtime_error(
+        "B+ Tree initialization failed");
+    }
     ifstream meta("../data/schema.meta");
     if (!meta)
     {

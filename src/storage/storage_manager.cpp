@@ -54,16 +54,18 @@ void StorageManager::writePage(
 }
 
 int StorageManager::allocatePage(
-    const string &filename)
+    const std::string &filename)
 {
     fstream file(
         filename,
         ios::binary | ios::in | ios::out);
 
-    // Create file if it doesn't exist
     if (!file)
     {
-        ofstream create(filename, ios::binary);
+        ofstream create(
+            filename,
+            ios::binary);
+
         create.close();
 
         file.open(
@@ -73,17 +75,25 @@ int StorageManager::allocatePage(
 
     file.seekg(0, ios::end);
 
-    streampos fileSize = file.tellg();
+    streampos fileSize =
+        file.tellg();
 
-    int pageNumber = static_cast<int>(
-        fileSize / PAGE_SIZE);
+    int pageNumber =
+        static_cast<int>(
+            fileSize / PAGE_SIZE);
 
-    Page emptyPage;
+    char emptyPage[PAGE_SIZE];
 
-    file.write(
-        emptyPage.data,
+    std::memset(
+        emptyPage,
+        0,
         PAGE_SIZE);
 
+    file.write(
+        emptyPage,
+        PAGE_SIZE);
+
+    file.flush();
     file.close();
 
     return pageNumber;

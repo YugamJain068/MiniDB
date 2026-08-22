@@ -3,11 +3,15 @@
 #include <iostream>
 
 BPlusTreePageManager::BPlusTreePageManager(
-    BufferPoolManager& bufferPool,
-    const std::string& filename)
+    BufferPoolManager &bufferPool,
+    const std::string &filename)
     : bufferPool(bufferPool),
       filename(filename)
 {
+    std::cout
+        << "PageManager created for: "
+        << filename
+        << "\n";
 }
 
 int BPlusTreePageManager::allocateLeafPage()
@@ -19,7 +23,7 @@ int BPlusTreePageManager::allocateLeafPage()
     if (pageId == -1)
         return -1;
 
-    Page* page =
+    Page *page =
         bufferPool.FetchPage(
             filename,
             pageId);
@@ -45,6 +49,16 @@ int BPlusTreePageManager::allocateLeafPage()
         filename,
         pageId);
 
+    BPlusTreeMetadata metadata{};
+
+    if (!readMetadata(metadata))
+        return -1;
+
+    metadata.pageCount =
+        bufferPool.GetPageCount(filename);
+
+    writeMetadata(metadata);
+
     return pageId;
 }
 
@@ -53,7 +67,7 @@ int BPlusTreePageManager::allocateInternalPage()
     int pageId =
         bufferPool.AllocatePage(filename);
 
-    Page* page =
+    Page *page =
         bufferPool.FetchPage(
             filename,
             pageId);
@@ -79,14 +93,24 @@ int BPlusTreePageManager::allocateInternalPage()
         filename,
         pageId);
 
+    BPlusTreeMetadata metadata{};
+
+    if (!readMetadata(metadata))
+        return -1;
+
+    metadata.pageCount =
+        bufferPool.GetPageCount(filename);
+
+    writeMetadata(metadata);
+
     return pageId;
 }
 
 bool BPlusTreePageManager::readLeafPage(
     int pageId,
-    LeafPage& leaf)
+    LeafPage &leaf)
 {
-    Page* page =
+    Page *page =
         bufferPool.FetchPage(
             filename,
             pageId);
@@ -107,9 +131,9 @@ bool BPlusTreePageManager::readLeafPage(
 
 bool BPlusTreePageManager::writeLeafPage(
     int pageId,
-    const LeafPage& leaf)
+    const LeafPage &leaf)
 {
-    Page* page =
+    Page *page =
         bufferPool.FetchPage(
             filename,
             pageId);
@@ -134,9 +158,9 @@ bool BPlusTreePageManager::writeLeafPage(
 
 bool BPlusTreePageManager::readInternalPage(
     int pageId,
-    InternalPage& internal)
+    InternalPage &internal)
 {
-    Page* page =
+    Page *page =
         bufferPool.FetchPage(
             filename,
             pageId);
@@ -157,9 +181,9 @@ bool BPlusTreePageManager::readInternalPage(
 
 bool BPlusTreePageManager::writeInternalPage(
     int pageId,
-    const InternalPage& internal)
+    const InternalPage &internal)
 {
-    Page* page =
+    Page *page =
         bufferPool.FetchPage(
             filename,
             pageId);
@@ -187,7 +211,15 @@ bool BPlusTreePageManager::initializeIndex()
     int pageCount =
         bufferPool.GetPageCount(filename);
 
+    std::cout
+        << "INITIALIZE INDEX: pageCount = "
+        << pageCount
+        << "\n";
+
+    // ========================================
     // New index file
+    // ========================================
+
     if (pageCount == 0)
     {
         int pageId =
@@ -201,7 +233,7 @@ bool BPlusTreePageManager::initializeIndex()
             return false;
         }
 
-        Page* page =
+        Page *page =
             bufferPool.FetchPage(
                 filename,
                 0);
@@ -211,12 +243,11 @@ bool BPlusTreePageManager::initializeIndex()
 
         BPlusTreeMetadata metadata{};
 
-        initializeMetadata(
-            metadata);
+        initializeMetadata(metadata);
 
-        serializeMetadata(
-            metadata,
-            *page);
+
+        serializeMetadata(metadata, *page);
+
 
         bufferPool.MarkDirty(
             filename,
@@ -229,13 +260,24 @@ bool BPlusTreePageManager::initializeIndex()
         return true;
     }
 
+    // ========================================
+    // Existing index file
+    // ========================================
+
+    BPlusTreeMetadata metadata{};
+
+    if (!readMetadata(metadata))
+    {
+        return false;
+    }
+
     return true;
 }
 
 bool BPlusTreePageManager::readMetadata(
-    BPlusTreeMetadata& metadata)
+    BPlusTreeMetadata &metadata)
 {
-    Page* page =
+    Page *page =
         bufferPool.FetchPage(
             filename,
             0);
@@ -251,8 +293,7 @@ bool BPlusTreePageManager::readMetadata(
         filename,
         0);
 
-    if (metadata.magic !=
-        BPLUS_INDEX_MAGIC)
+    if (metadata.magic != BPLUS_INDEX_MAGIC)
     {
         std::cout
             << "Invalid B+ Tree index file\n";
@@ -260,8 +301,7 @@ bool BPlusTreePageManager::readMetadata(
         return false;
     }
 
-    if (metadata.version !=
-        BPLUS_INDEX_VERSION)
+    if (metadata.version != BPLUS_INDEX_VERSION)
     {
         std::cout
             << "Unsupported B+ Tree index version\n";
@@ -271,11 +311,10 @@ bool BPlusTreePageManager::readMetadata(
 
     return true;
 }
-
 bool BPlusTreePageManager::writeMetadata(
-    const BPlusTreeMetadata& metadata)
+    const BPlusTreeMetadata &metadata)
 {
-    Page* page =
+    Page *page =
         bufferPool.FetchPage(
             filename,
             0);
@@ -298,7 +337,7 @@ bool BPlusTreePageManager::writeMetadata(
     return true;
 }
 
-const std::string&
+const std::string &
 BPlusTreePageManager::getFilename() const
 {
     return filename;
@@ -308,7 +347,7 @@ bool BPlusTreePageManager::setParentPageId(
     int pageId,
     int parentPageId)
 {
-    Page* page =
+    Page *page =
         bufferPool.FetchPage(
             filename,
             pageId);

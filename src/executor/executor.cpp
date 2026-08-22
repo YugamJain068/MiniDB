@@ -1,5 +1,8 @@
 #include "executor.h"
 
+#include "sequential_scan.h"
+#include "index_scan.h"
+
 #include "../storage/table.h"
 #include "../models/row.h"
 
@@ -176,49 +179,71 @@ void Executor::executeSelect(SelectStatement *stmt)
         cout << "Table not found\n";
         return;
     }
+
+    Table &table =
+        database.getTable(stmt->tableName);
+
+    // ========================================
+    // WHERE -> Index Scan
+    // ========================================
+
     if (stmt->hasWhere)
     {
-        RecordPointer ptr =
-            database
-                .getIndex()
-                .search(stmt->whereId);
+        IndexScan scan(
+            table,
+            database.getIndex(),
+            stmt->whereId);
 
-        if (ptr.pageId == -1)
+        scan.open();
+
+        Row row{};
+
+        if (scan.next(row))
         {
-            std::cout
+            cout
+                << row.id
+                << " "
+                << row.name
+                << '\n';
+        }
+        else
+        {
+            cout
                 << "No rows found.\n";
-
-            return;
         }
 
-        Row row =
-            database.selectByPointer(
-                stmt->tableName,
-                ptr);
-
-        std::cout
-            << row.id
-            << " "
-            << row.name
-            << '\n';
+        scan.close();
 
         return;
     }
-    std::cout << "Full Table Scan\n";
 
-    auto rows = database.selectAll(stmt->tableName);
+    // ========================================
+    // No WHERE -> Sequential Scan
+    // ========================================
 
-    if (rows.empty())
-    {
-        cout << "No rows found.\n";
-        return;
-    }
+    cout
+        << "Full Table Scan\n";
 
-    cout << "+----+--------------------------------+\n";
-    cout << "| ID | Name                           |\n";
-    cout << "+----+--------------------------------+\n";
+    SequentialScan scan(
+        table,
+        database.getBufferPool());
 
-    for (const auto &row : rows)
+    scan.open();
+
+    Row row{};
+
+    int count = 0;
+
+    cout
+        << "+----+--------------------------------+\n";
+
+    cout
+        << "| ID | Name                           |\n";
+
+    cout
+        << "+----+--------------------------------+\n";
+
+    while (scan.next(row))
     {
         cout
             << "| "
@@ -230,7 +255,18 @@ void Executor::executeSelect(SelectStatement *stmt)
             << left
             << row.name
             << " |\n";
+
+        count++;
     }
 
-    cout << "+----+--------------------------------+\n";
+    scan.close();
+
+    cout
+        << "+----+--------------------------------+\n";
+
+    if (count == 0)
+    {
+        cout
+            << "No rows found.\n";
+    }
 }
